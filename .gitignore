@@ -4,5 +4,7 @@
 # vim
 .vim/
 
+__pycache__/
+
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 22:01 [CST]
