@@ -34,6 +34,22 @@ def blend(
         cv.waitKey(int(1000 / fps))
 
 
+def set_pixel(img: np.ndarray, x: int, y: int,
+              color: tuple = (255, 255, 255)):
+    assert len(img.shape) == 3 and img.shape[2] == 3
+    img[x, y] = color
+
+
+def coscurve(frame: np.ndarray,
+             pos: int,
+             width: int = 1920,
+             height: int = 1080):
+    for i in range(height):
+        j = int(pos + width / 8 * np.sin(2 * np.pi / (height * 2) *
+                                         (i - height // 2.5)))
+        set_pixel(frame, i, j)
+
+
 # :param prog: has possible values 0, 1, 2, 3, indicates drawing's
 #              completeness
 def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
@@ -41,8 +57,8 @@ def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
     frame = np.zeros((height, width, 3), dtype=np.uint8)
     print(frame.shape)
 
-    if prog <= 1:
-        pass
+    if prog >= 0:
+        coscurve(frame, width // 4)
 
     return frame
 
