@@ -1,5 +1,8 @@
 # videos
 *.mp4
 
+# vim
+.vim/
+
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 22:01 [CST]
