@@ -8,18 +8,7 @@ import numpy as np
 import sys
 
 
-# :param prog: has possible values 0, 1, 2, 3, indicates drawing's
-#              completeness
-def draw(prog: int) -> np.ndarray:
-    # Use black background
-    frame = np.zeros((height, width, 3), dtype=np.uint8)
-    # print(frame.shape)
-
-    return frame
-
-
-# :param prog: has possible values 0, 1.  0 for zju logo, 1 for personal info
-def fanfare(width: int = 1920, height: int = 1080) -> np.ndarray:
+def fanfare_logo(width: int = 1920, height: int = 1080) -> np.ndarray:
     logofile = "./stuff/zjulogo.png"
     logo = utils.downsample(cv.imread(logofile), 3)
     logo_width = logo.shape[0]
@@ -33,21 +22,110 @@ def fanfare(width: int = 1920, height: int = 1080) -> np.ndarray:
     frame[ver_begin:ver_begin + logo_height,
           hor_begin:hor_begin + logo_width,] = logo
 
-    text = "I have the high ground"
+    # Title text
+    text = "PA1: Mustafar"
     fontface = cv.FONT_ITALIC
-    origin = (hor_begin, ver_begin)
+    origin = (width // 2 - 110, height // 8)
     color = (255, 255, 255)
     thickness = 2
     linetype = cv.LINE_AA
 
-    cv.putText(frame, text, origin, fontface, 1, color, thickness, linetype)
+    cv.putText(
+        frame,
+        text,
+        origin,
+        fontface,
+        1,
+        color,
+        thickness=thickness,
+        lineType=linetype)
 
     return frame
 
 
-def credits(width: int = 1920, height: int = 1080) -> np.ndarray:
+def fanfare_me(width: int = 1920, height: int = 1080) -> np.ndarray:
+    avatarfile = "./stuff/gy.jpg"
+    avatar = utils.downsample(cv.imread(avatarfile), 2)
+    avatar_width = avatar.shape[0]
+    avatar_height = avatar.shape[1]
+    frame = np.zeros((height, width, 3), dtype=np.uint8)
+
+    hor_begin = (width - avatar_width) // 2
+    ver_begin = (height - avatar_height) * 1 // 4
+    # print(frame.shape)
+    frame[ver_begin:ver_begin + avatar_height,
+          hor_begin:hor_begin + avatar_width,] = avatar
+
+    # Title text
+    text = "PA1: Mustafar"
+    fontface = cv.FONT_ITALIC
+    origin = (width // 2 - 110, height // 8)
+    color = (255, 255, 255)
+    thickness = 2
+    linetype = cv.LINE_AA
+
+    cv.putText(
+        frame,
+        text,
+        origin,
+        fontface,
+        1,
+        color,
+        thickness=thickness,
+        lineType=linetype)
+
+    return frame
+
+
+def credits_plot(width: int = 1920, height: int = 1080) -> np.ndarray:
+    fontface = cv.FONT_HERSHEY_TRIPLEX
+    color = (255, 255, 255)
+    thickness = 2
+    linetype = cv.LINE_AA
     # Use black background
     frame = np.zeros((height, width, 3), dtype=np.uint8)
+    cv.putText(
+        frame,
+        "Written and directed by", (width // 2 - 180, height // 2),
+        fontface,
+        1,
+        color,
+        thickness=thickness - 1,
+        lineType=linetype)
+    cv.putText(
+        frame,
+        "GEORGE LUCAS", (width // 2 - 110, height // 2 + 50),
+        fontface,
+        1,
+        color,
+        thickness=thickness,
+        lineType=linetype)
+    return frame
+
+
+def credits_video(width: int = 1920, height: int = 1080) -> np.ndarray:
+    fontface = cv.FONT_HERSHEY_TRIPLEX
+    color = (255, 255, 255)
+    thickness = 2
+    linetype = cv.LINE_AA
+    # Use black background
+    frame = np.zeros((height, width, 3), dtype=np.uint8)
+    cv.putText(
+        frame,
+        "Video made by", (width // 2 - 150, height // 2),
+        fontface,
+        1,
+        color,
+        thickness=thickness - 1,
+        lineType=linetype)
+    cv.putText(
+        frame,
+        "Gaoyang Zhang", (width // 2 - 150, height // 2 + 50),
+        fontface,
+        1,
+        color,
+        thickness=thickness,
+        lineType=linetype)
     return frame
 
 
@@ -82,21 +160,38 @@ if __name__ == '__main__':
     ax, ay = width // 8, height * 2 // 3
 
     print("Generating fanfare ..")
-    opening.append(fanfare())
+    opening.append(fanfare_logo())
+    opening.append(fanfare_me())
 
-    print("Drawing Mustafar ..")
-    kidsdrawing.append(utils.Mustafar(frame, width // 4).copy())
+    # print("Drawing Mustafar ..")
+    # kidsdrawing.append(utils.Mustafar(frame, width // 4).copy())
     print("Drawing Anakin Skywalker ..")
     kidsdrawing.append(utils.Anakin(frame, (ax, ay)).copy())
     print("Drawing ObiWan Kenobi ..")
     kidsdrawing.append(utils.ObiWan(frame, (ox, oy)).copy())
+    fullscene = frame.copy()
+    print("Inserting quote ..")
+    kidsdrawing.append(
+        utils.quote_obiwan(fullscene.copy(), (ox, oy), 0).copy())
+    kidsdrawing.append(
+        utils.quote_obiwan(fullscene.copy(), (ox, oy), 1).copy())
+    kidsdrawing.append(utils.quote_anakin(fullscene.copy(), (ax, ay)).copy())
+    kidsdrawing.append(
+        utils.quote_obiwan(fullscene.copy(), (ox, oy), 2).copy())
+    print("Generating epilog ..")
+    for i in range(2):
+        kidsdrawing.append(utils.epilog(i))
 
     print("Generating credits ..")
-    ending.append(credits())
+    ending.append(credits_plot())
+    ending.append(credits_video())
 
     ############## Play by frame and save as video file ##############
     # Opening
     # print("Opening")
+    for img in opening:
+        cv.imshow(name, img)
+        cv.waitKey()
 
     # Kid's drawing
     # print("Content")
@@ -106,6 +201,9 @@ if __name__ == '__main__':
 
     # Ending
     # print("Ending")
+    for img in ending:
+        cv.imshow(name, img)
+        cv.waitKey()
 
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 17:54 [CST]

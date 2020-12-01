@@ -5,7 +5,8 @@ import numpy
 
 
 def downsample(img: numpy.ndarray, factor: int = 2) -> numpy.ndarray:
-    return img[::factor, ::factor,]
+    assert factor > 0
+    return img if factor == 1 else img[::factor, ::factor,]
 
 
 def blend(
@@ -176,6 +177,15 @@ def Mustafar(frame: numpy.ndarray, pos: int) -> numpy.ndarray:
     return frame
 
 
+def Anakin(frame: numpy.ndarray, apos: tuple) -> numpy.ndarray:
+    width, height = frame.shape[0:2]
+    ax, ay = apos
+    assert 0 <= ax < width and 0 <= ay < height, f"Anakin is at {apos}"
+    FloatingIsland(frame, (ax, ay + 70))
+    Jedi(frame, apos, saber_on="righthand", sabercolor=(0x9e, 0xa0, 0xd7))
+    return frame
+
+
 # opos = (hor, ver)
 def ObiWan(frame: numpy.ndarray, opos: tuple) -> numpy.ndarray:
     height, width = frame.shape[0:2]
@@ -185,12 +195,78 @@ def ObiWan(frame: numpy.ndarray, opos: tuple) -> numpy.ndarray:
     return frame
 
 
-def Anakin(frame: numpy.ndarray, apos: tuple) -> numpy.ndarray:
-    width, height = frame.shape[0:2]
+def quote_obiwan(frame: numpy.ndarray, opos: tuple,
+                 quoteid: int) -> numpy.ndarray:
+    height, width = frame.shape[0:2]
+    ox, oy = opos
+    assert 0 <= ox < width and 0 <= oy < height, f"ObiWan is at {opos}"
+    quotes = [
+        ("It's over", "Anakin"),
+        ("I have the", "highground"),
+        ("Don't try it",),
+    ]
+    current_quote = quotes[quoteid]
+    fontface = cv2.FONT_HERSHEY_COMPLEX
+    color = (255, 255, 255)
+    linetype = cv2.LINE_AA
+
+    for i, piece in enumerate(current_quote):
+        cv2.putText(
+            frame,
+            piece, (ox - 150, oy - 60 + i * 25),
+            fontface,
+            0.8,
+            color,
+            thickness=1,
+            lineType=linetype)
+    return frame
+
+
+def quote_anakin(frame: numpy.ndarray, apos: tuple) -> numpy.ndarray:
+    height, width = frame.shape[0:2]
     ax, ay = apos
     assert 0 <= ax < width and 0 <= ay < height, f"Anakin is at {apos}"
-    FloatingIsland(frame, (ax, ay + 70))
-    Jedi(frame, apos, saber_on="righthand", sabercolor=(0x9e, 0xa0, 0xd7))
+    youunderestimatemypower = (
+        "You underestimate",
+        "my power",
+    )
+    fontface = cv2.FONT_HERSHEY_COMPLEX
+    color = (255, 255, 255)
+    linetype = cv2.LINE_AA
+
+    for i, piece in enumerate(youunderestimatemypower):
+        cv2.putText(
+            frame,
+            piece, (ax + 20, ay - 75 + i * 25),
+            fontface,
+            0.8,
+            color,
+            thickness=1,
+            lineType=linetype)
+    return frame
+
+
+def epilog(epilogid: int,
+           width: int = 1920,
+           height: int = 1080) -> numpy.ndarray:
+    frame = numpy.zeros((height, width, 3), dtype=numpy.uint8)
+    text = [
+        ("Anakin tried anyway.",),
+        ("Anakin lost his leg.",),
+    ]
+    fontface = cv2.FONT_HERSHEY_COMPLEX
+    color = (255, 255, 255)
+    linetype = cv2.LINE_AA
+
+    for i, piece in enumerate(text[epilogid]):
+        cv2.putText(
+            frame,
+            piece, (width // 2 - 125, height // 2),
+            fontface,
+            0.8,
+            color,
+            thickness=1,
+            lineType=linetype)
     return frame
 
 
