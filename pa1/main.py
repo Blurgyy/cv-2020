@@ -13,15 +13,13 @@ import sys
 def draw(prog: int) -> np.ndarray:
     # Use black background
     frame = np.zeros((height, width, 3), dtype=np.uint8)
-    print(frame.shape)
-
-
+    # print(frame.shape)
 
     return frame
 
 
 # :param prog: has possible values 0, 1.  0 for zju logo, 1 for personal info
-def opening(width: int = 1920, height: int = 1080) -> np.ndarray:
+def fanfare(width: int = 1920, height: int = 1080) -> np.ndarray:
     logofile = "./stuff/zjulogo.png"
     logo = utils.downsample(cv.imread(logofile), 3)
     logo_width = logo.shape[0]
@@ -31,7 +29,7 @@ def opening(width: int = 1920, height: int = 1080) -> np.ndarray:
 
     hor_begin = (width - logo_width) // 2
     ver_begin = (height - logo_height) * 1 // 4
-    print(frame.shape)
+    # print(frame.shape)
     frame[ver_begin:ver_begin + logo_height,
           hor_begin:hor_begin + logo_width,] = logo
 
@@ -47,7 +45,7 @@ def opening(width: int = 1920, height: int = 1080) -> np.ndarray:
     return frame
 
 
-def ending(width: int = 1920, height: int = 1080) -> np.ndarray:
+def credits(width: int = 1920, height: int = 1080) -> np.ndarray:
     # Use black background
     frame = np.zeros((height, width, 3), dtype=np.uint8)
     return frame
@@ -75,34 +73,39 @@ if __name__ == '__main__':
     # Video writer
     out = cv.VideoWriter(savfile, fourcc, fps, (width, height))
 
+    ############## Generate video pieces ##############
+    frame = np.zeros((height, width, 3), dtype=np.uint8)
+    opening, kidsdrawing, ending = [], [], []
+    # ObiWan's position
+    ox, oy = width * 3 // 4, height // 3
+    # Anakin's position
+    ax, ay = width // 8, height * 2 // 3
+
+    print("Generating fanfare ..")
+    opening.append(fanfare())
+
+    print("Drawing Mustafar ..")
+    kidsdrawing.append(utils.Mustafar(frame, width // 4).copy())
+    print("Drawing Anakin Skywalker ..")
+    kidsdrawing.append(utils.Anakin(frame, (ax, ay)).copy())
+    print("Drawing ObiWan Kenobi ..")
+    kidsdrawing.append(utils.ObiWan(frame, (ox, oy)).copy())
+
+    print("Generating credits ..")
+    ending.append(credits())
+
     ############## Play by frame and save as video file ##############
     # Opening
-    print("Opening")
-    for fid in range(int(1.5 * fps)):
-        showimg = opening()
-        cv.imshow(name, showimg)
-        out.write(showimg)
-        key = cv.waitKey(int(1000 / fps))
-        consume_key(key)
+    # print("Opening")
 
-    utils.blend(showimg, draw(0), name, out)
     # Kid's drawing
-    print("Content")
-    for fid in range(int(vidlen * fps)):
-        showimg = draw(0)
-        cv.imshow(name, showimg)
-        out.write(showimg)
-        key = cv.waitKey(int(1000 / fps))
-        consume_key(key)
+    # print("Content")
+    for img in kidsdrawing:
+        cv.imshow(name, img)
+        cv.waitKey()
 
     # Ending
-    print("Ending")
-    for fid in range(1.5 * fps):
-        showimg = ending()
-        cv.imshow(name, showimg)
-        out.write(showimg)
-        key = cv.waitKey(int(1000 / fps))
-        consume_key(key)
+    # print("Ending")
 
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 17:54 [CST]
