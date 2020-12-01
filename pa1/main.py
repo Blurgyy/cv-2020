@@ -31,8 +31,8 @@ def opening(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
     hor_begin = (width - logo_width) // 2
     ver_begin = (height - logo_height) // 2
     print(frame.shape)
-    frame[hor_begin:hor_begin + logo_width,
-          ver_begin:ver_begin + logo_height] = logo
+    frame[ver_begin:ver_begin + logo_height,
+          hor_begin:hor_begin + logo_width,] = logo
 
     return frame
 
