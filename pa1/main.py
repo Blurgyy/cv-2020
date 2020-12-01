@@ -5,7 +5,7 @@ import utils
 
 import cv2 as cv
 import numpy as np
-import sys
+import time
 
 
 def fanfare_logo(width: int = 1920, height: int = 1080) -> np.ndarray:
@@ -74,6 +74,23 @@ def fanfare_me(width: int = 1920, height: int = 1080) -> np.ndarray:
         thickness=thickness,
         lineType=linetype)
 
+    # Name, student id, date&time
+    texts = (
+        "Gaoyang Zhang",
+        "12021052",
+        time.asctime(),
+    )
+    fontface = cv.FONT_ITALIC
+    for i, text in enumerate(texts):
+        cv.putText(
+            frame,
+            text, (width * 13 // 16, height * 7 // 8 + i * 40),
+            fontface,
+            0.7,
+            color,
+            1,
+            lineType=linetype)
+
     return frame
 
 
@@ -126,15 +143,15 @@ def credits_video(width: int = 1920, height: int = 1080) -> np.ndarray:
         color,
         thickness=thickness,
         lineType=linetype)
+    cv.putText(
+        frame,
+        "12021052", (width // 2 - 100, height // 2 + 100),
+        fontface,
+        1,
+        color,
+        thickness=thickness - 1,
+        lineType=linetype)
     return frame
-
-
-def consume_key(key: int):
-    if key == ord(' '):
-        key = cv.waitKey()
-    if key == ord('q'):
-        cv.destroyAllWindows()
-        sys.exit(0)
 
 
 if __name__ == '__main__':
@@ -143,7 +160,8 @@ if __name__ == '__main__':
     height = 1080
     vidlen = 10
     fps = 24
-    name = "kidsdrawing"
+    waitms = int(1000 / fps)
+    name = "Mustafar"
 
     # save file configs
     savfile = name + ".mp4"
@@ -161,12 +179,12 @@ if __name__ == '__main__':
 
     print("Generating fanfare ..")
     opening.append(fanfare_logo())
-    opening.append(fanfare_me())
+    opening.append(fanfare_me())  # 1
 
-    # print("Drawing Mustafar ..")
-    # kidsdrawing.append(utils.Mustafar(frame, width // 4).copy())
+    print("Drawing Mustafar ..")
+    kidsdrawing.append(utils.Mustafar(frame, width // 4).copy())
     print("Drawing Anakin Skywalker ..")
-    kidsdrawing.append(utils.Anakin(frame, (ax, ay)).copy())
+    kidsdrawing.append(utils.Anakin(frame, (ax, ay)).copy())  # 2
     print("Drawing ObiWan Kenobi ..")
     kidsdrawing.append(utils.ObiWan(frame, (ox, oy)).copy())
     fullscene = frame.copy()
@@ -177,33 +195,31 @@ if __name__ == '__main__':
         utils.quote_obiwan(fullscene.copy(), (ox, oy), 1).copy())
     kidsdrawing.append(utils.quote_anakin(fullscene.copy(), (ax, ay)).copy())
     kidsdrawing.append(
-        utils.quote_obiwan(fullscene.copy(), (ox, oy), 2).copy())
+        utils.quote_obiwan(fullscene.copy(), (ox, oy), 2).copy())  # 7
     print("Generating epilog ..")
     for i in range(2):
-        kidsdrawing.append(utils.epilog(i))
+        kidsdrawing.append(utils.epilog(i))  # 9
 
     print("Generating credits ..")
-    ending.append(credits_plot())
+    ending.append(credits_plot())  # 10
     ending.append(credits_video())
 
     ############## Play by frame and save as video file ##############
-    # Opening
-    # print("Opening")
-    for img in opening:
-        cv.imshow(name, img)
-        cv.waitKey()
+    full = opening + kidsdrawing + ending
+    for f in range(fps):
+        out.write(full[0])
+        cv.imshow(name, full[0])
+        key = cv.waitKey(waitms)
+        utils.consume_key(key)
 
-    # Kid's drawing
-    # print("Content")
-    for img in kidsdrawing:
-        cv.imshow(name, img)
-        cv.waitKey()
-
-    # Ending
-    # print("Ending")
-    for img in ending:
-        cv.imshow(name, img)
-        cv.waitKey()
+    for i in range(1, len(full)):
+        utils.blend(full[i - 1], full[i], name, out, i <= 2 or i > 8)
+        elapse = 1 if i <= 3 or i > 7 else 0.7
+        for f in range(int(fps * elapse)):
+            out.write(full[i])
+            cv.imshow(name, full[i])
+            key = cv.waitKey(waitms)
+            utils.consume_key(key)
 
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 17:54 [CST]

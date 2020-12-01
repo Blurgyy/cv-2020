@@ -2,6 +2,7 @@
 
 import cv2
 import numpy
+import sys
 
 
 def downsample(img: numpy.ndarray, factor: int = 2) -> numpy.ndarray:
@@ -9,28 +10,48 @@ def downsample(img: numpy.ndarray, factor: int = 2) -> numpy.ndarray:
     return img if factor == 1 else img[::factor, ::factor,]
 
 
+def consume_key(key: int):
+    if key == ord(' '):
+        key = cv2.waitKey()
+    if key == ord('q'):
+        cv2.destroyAllWindows()
+        sys.exit(0)
+
+
 def blend(
         imgs: numpy.ndarray,
         imgt: numpy.ndarray,
         winname: str,
         writer: cv2.VideoWriter,
+        gotoblack: bool = False,
         elapse: float = 1.0,  # in seconds
         fps: int = 24):
     assert imgs.shape == imgt.shape
 
     fcnt = int((elapse * fps + 1) / 2)  # ceil
-    for f in range(fcnt):
-        prog = f / fcnt
-        inter = (imgs * (1 - prog)).astype(numpy.uint8)
-        cv2.imshow(winname, inter)
-        writer.write(inter)
-        cv2.waitKey(int(1000 / fps))
-    for f in range(fcnt):
-        prog = f / fcnt
-        inter = (imgt * prog).astype(numpy.uint8)
-        cv2.imshow(winname, inter)
-        writer.write(inter)
-        cv2.waitKey(int(1000 / fps))
+    if gotoblack:
+        for f in range(fcnt):
+            prog = f / fcnt
+            inter = (imgs * (1 - prog)).astype(numpy.uint8)
+            cv2.imshow(winname, inter)
+            writer.write(inter)
+            key = cv2.waitKey(int(1000 / fps))
+            consume_key(key)
+        for f in range(fcnt):
+            prog = f / fcnt
+            inter = (imgt * prog).astype(numpy.uint8)
+            cv2.imshow(winname, inter)
+            writer.write(inter)
+            key = cv2.waitKey(int(1000 / fps))
+            consume_key(key)
+    else:
+        for f in range(fcnt):
+            prog = f / fcnt
+            inter = (imgs * (1 - prog) + imgt * prog).astype(numpy.uint8)
+            cv2.imshow(winname, inter)
+            writer.write(inter)
+            key = cv2.waitKey(int(1000 / fps))
+            consume_key(key)
 
 
 def set_pixel(img: numpy.ndarray,
@@ -252,7 +273,7 @@ def epilog(epilogid: int,
     frame = numpy.zeros((height, width, 3), dtype=numpy.uint8)
     text = [
         ("Anakin tried anyway.",),
-        ("Anakin lost his leg.",),
+        ("Anakin lost his legs.",),
     ]
     fontface = cv2.FONT_HERSHEY_COMPLEX
     color = (255, 255, 255)
