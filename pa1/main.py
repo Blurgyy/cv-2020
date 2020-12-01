@@ -1,53 +1,11 @@
 #!/usr/bin/env -S python3 -u
 # Do not enable conda's virtualenv for this script
 
+import utils
+
 import cv2 as cv
 import numpy as np
 import sys
-
-
-def downsample(img: np.ndarray, factor: int = 2) -> np.ndarray:
-    return img[::factor, ::factor,]
-
-
-def blend(
-        imgs: np.ndarray,
-        imgt: np.ndarray,
-        winname: str,
-        writer: cv.VideoWriter,
-        elapse: float = 1.0,  # in seconds
-        fps: int = 24):
-    assert imgs.shape == imgt.shape
-
-    fcnt = int((elapse * fps + 1) / 2)  # ceil
-    for f in range(fcnt):
-        prog = f / fcnt
-        inter = (imgs * (1 - prog)).astype(np.uint8)
-        cv.imshow(winname, inter)
-        writer.write(inter)
-        cv.waitKey(int(1000 / fps))
-    for f in range(fcnt):
-        prog = f / fcnt
-        inter = (imgt * prog).astype(np.uint8)
-        cv.imshow(winname, inter)
-        writer.write(inter)
-        cv.waitKey(int(1000 / fps))
-
-
-def set_pixel(img: np.ndarray, x: int, y: int,
-              color: tuple = (255, 255, 255)):
-    assert len(img.shape) == 3 and img.shape[2] == 3
-    img[x, y] = color
-
-
-def coscurve(frame: np.ndarray,
-             pos: int,
-             width: int = 1920,
-             height: int = 1080):
-    for i in range(height):
-        j = int(pos + width / 8 * np.sin(2 * np.pi / (height * 2) *
-                                         (i - height // 2.5)))
-        set_pixel(frame, i, j)
 
 
 # :param prog: has possible values 0, 1, 2, 3, indicates drawing's
@@ -58,7 +16,7 @@ def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
     print(frame.shape)
 
     if prog >= 0:
-        coscurve(frame, width // 4)
+        utils.coscurve(frame, width // 4)
 
     return frame
 
@@ -66,7 +24,7 @@ def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
 # :param prog: has possible values 0, 1.  0 for zju logo, 1 for personal info
 def opening(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
     logofile = "./stuff/zjulogo.png"
-    logo = downsample(cv.imread(logofile), 3)
+    logo = utils.downsample(cv.imread(logofile), 3)
     logo_width = logo.shape[0]
     logo_height = logo.shape[1]
     # Use black background
@@ -126,7 +84,7 @@ if __name__ == '__main__':
         key = cv.waitKey(int(1000 / fps))
         consume_key(key)
 
-    blend(showimg, draw(0), name, out)
+    utils.blend(showimg, draw(0), name, out)
     # Kid's drawing
     for fid in range(int(vidlen * fps)):
         showimg = draw(0)
