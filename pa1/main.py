@@ -10,6 +10,30 @@ def downsample(img: np.ndarray, factor: int = 2) -> np.ndarray:
     return img[::factor, ::factor,]
 
 
+def blend(
+        imgs: np.ndarray,
+        imgt: np.ndarray,
+        winname: str,
+        writer: cv.VideoWriter,
+        elapse: float = 1.0,  # in seconds
+        fps: int = 24):
+    assert imgs.shape == imgt.shape
+
+    fcnt = int((elapse * fps + 1) / 2)  # ceil
+    for f in range(fcnt):
+        prog = f / fcnt
+        inter = (imgs * (1 - prog)).astype(np.uint8)
+        cv.imshow(winname, inter)
+        writer.write(inter)
+        cv.waitKey(int(1000 / fps))
+    for f in range(fcnt):
+        prog = f / fcnt
+        inter = (imgt * prog).astype(np.uint8)
+        cv.imshow(winname, inter)
+        writer.write(inter)
+        cv.waitKey(int(1000 / fps))
+
+
 # :param prog: has possible values 0, 1, 2, 3, indicates drawing's
 #              completeness
 def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
@@ -85,10 +109,11 @@ if __name__ == '__main__':
         out.write(showimg)
         key = cv.waitKey(int(1000 / fps))
         consume_key(key)
+
+    blend(showimg, draw(0), name, out)
     # Kid's drawing
     for fid in range(int(vidlen * fps)):
-        if fid:
-            showimg = draw(0)
+        showimg = draw(0)
         cv.imshow(name, showimg)
         out.write(showimg)
         key = cv.waitKey(int(1000 / fps))
