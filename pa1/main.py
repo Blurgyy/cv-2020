@@ -41,8 +41,9 @@ def opening(width: int = 1920, height: int = 1080) -> np.ndarray:
     origin = (hor_begin, ver_begin)
     color = (255, 255, 255)
     thickness = 2
+    linetype = cv.LINE_AA
 
-    cv.putText(frame, text, origin, fontface, 1, color, thickness)
+    cv.putText(frame, text, origin, fontface, 1, color, thickness, linetype)
 
     return frame
 
