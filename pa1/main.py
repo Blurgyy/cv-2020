@@ -10,13 +10,12 @@ import sys
 
 # :param prog: has possible values 0, 1, 2, 3, indicates drawing's
 #              completeness
-def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
+def draw(prog: int) -> np.ndarray:
     # Use black background
     frame = np.zeros((height, width, 3), dtype=np.uint8)
     print(frame.shape)
 
-    if prog >= 0:
-        utils.coastline(frame, width // 4)
+
 
     return frame
 

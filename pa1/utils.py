@@ -45,7 +45,7 @@ def set_pixel(img: numpy.ndarray,
 def coastline(frame: numpy.ndarray,
               pos: int,
               width: int = 1920,
-              height: int = 1080):
+              height: int = 1080) -> numpy.ndarray:
     costlinepos = lambda pos, width, height: int(pos + width / 8 * numpy.sin(
         2 * numpy.pi / (height * 2) * (i - height // 2.5)))
     lava_color = (0xff, 0x79, 0x1b)
@@ -58,6 +58,16 @@ def coastline(frame: numpy.ndarray,
                 set_pixel(frame, i, j, lava_color)
             else:
                 set_pixel(frame, i, j, island_color)
+    return frame
+
+
+def mustafar(width: int = 1920, height: int = 1080) -> list:
+    ret = []
+    frame = numpy.zeros((height, width, 3), dtype=numpy.uint8)
+
+    ret.append(coastline(frame, width // 4, width, height))  # Background
+
+    return ret
 
 
 # Author: Blurgy <gy@blurgy.xyz>
