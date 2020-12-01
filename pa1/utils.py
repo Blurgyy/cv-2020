@@ -32,20 +32,32 @@ def blend(
         cv2.waitKey(int(1000 / fps))
 
 
-def set_pixel(img: numpy.ndarray, x: int, y: int,
+def set_pixel(img: numpy.ndarray,
+              x: int,
+              y: int,
               color: tuple = (255, 255, 255)):
     assert len(img.shape) == 3 and img.shape[2] == 3
+    # Swap R and B channel for OpenCV
+    color = (color[2], color[1], color[0])
     img[x, y] = color
 
 
-def coscurve(frame: numpy.ndarray,
-             pos: int,
-             width: int = 1920,
-             height: int = 1080):
+def coastline(frame: numpy.ndarray,
+              pos: int,
+              width: int = 1920,
+              height: int = 1080):
+    costlinepos = lambda pos, width, height: int(pos + width / 8 * numpy.sin(
+        2 * numpy.pi / (height * 2) * (i - height // 2.5)))
+    lava_color = (0xff, 0x79, 0x1b)
+    island_color = (0x23, 0x11, 0x0f)
+
     for i in range(height):
-        j = int(pos + width / 8 * numpy.sin(2 * numpy.pi / (height * 2) *
-                                         (i - height // 2.5)))
-        set_pixel(frame, i, j)
+        for j in range(width):
+            cp = costlinepos(pos, width, height)
+            if j < cp:
+                set_pixel(frame, i, j, lava_color)
+            else:
+                set_pixel(frame, i, j, island_color)
 
 
 # Author: Blurgy <gy@blurgy.xyz>

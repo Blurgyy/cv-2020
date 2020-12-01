@@ -16,13 +16,13 @@ def draw(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
     print(frame.shape)
 
     if prog >= 0:
-        utils.coscurve(frame, width // 4)
+        utils.coastline(frame, width // 4)
 
     return frame
 
 
 # :param prog: has possible values 0, 1.  0 for zju logo, 1 for personal info
-def opening(prog: int, width: int = 1920, height: int = 1080) -> np.ndarray:
+def opening(width: int = 1920, height: int = 1080) -> np.ndarray:
     logofile = "./stuff/zjulogo.png"
     logo = utils.downsample(cv.imread(logofile), 3)
     logo_width = logo.shape[0]
@@ -77,8 +77,9 @@ if __name__ == '__main__':
 
     ############## Play by frame and save as video file ##############
     # Opening
+    print("Opening")
     for fid in range(int(1.5 * fps)):
-        showimg = opening(0)
+        showimg = opening()
         cv.imshow(name, showimg)
         out.write(showimg)
         key = cv.waitKey(int(1000 / fps))
@@ -86,6 +87,7 @@ if __name__ == '__main__':
 
     utils.blend(showimg, draw(0), name, out)
     # Kid's drawing
+    print("Content")
     for fid in range(int(vidlen * fps)):
         showimg = draw(0)
         cv.imshow(name, showimg)
@@ -94,6 +96,7 @@ if __name__ == '__main__':
         consume_key(key)
 
     # Ending
+    print("Ending")
     for fid in range(1.5 * fps):
         showimg = ending()
         cv.imshow(name, showimg)
