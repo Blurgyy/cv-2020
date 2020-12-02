@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     for i in range(1, len(full)):
         utils.blend(full[i - 1], full[i], name, out, i <= 2 or i > 8)
-        elapse = 1 if i <= 3 or i > 7 else 0.7
+        elapse = 1 if i <= 3 or i == 7 or i > 8 else 0.7
         for f in range(int(fps * elapse)):
             out.write(full[i])
             cv.imshow(name, full[i])
