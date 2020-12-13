@@ -11,8 +11,8 @@ import time
 def fanfare_logo(width: int = 1920, height: int = 1080) -> np.ndarray:
     logofile = "./stuff/zjulogo.png"
     logo = utils.downsample(cv.imread(logofile), 3)
-    logo_width = logo.shape[0]
-    logo_height = logo.shape[1]
+    logo_height = logo.shape[0]
+    logo_width = logo.shape[1]
     # Use black background
     frame = np.zeros((height, width, 3), dtype=np.uint8)
 
@@ -46,8 +46,8 @@ def fanfare_logo(width: int = 1920, height: int = 1080) -> np.ndarray:
 def fanfare_me(width: int = 1920, height: int = 1080) -> np.ndarray:
     avatarfile = "./stuff/gy.jpg"
     avatar = utils.downsample(cv.imread(avatarfile), 2)
-    avatar_width = avatar.shape[0]
-    avatar_height = avatar.shape[1]
+    avatar_height = avatar.shape[0]
+    avatar_width = avatar.shape[1]
     frame = np.zeros((height, width, 3), dtype=np.uint8)
 
     hor_begin = (width - avatar_width) // 2
