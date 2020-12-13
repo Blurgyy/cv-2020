@@ -6,6 +6,7 @@ import utils
 import cv2 as cv
 import numpy as np
 import time
+import sys
 
 
 def fanfare_logo(width: int = 1920, height: int = 1080) -> np.ndarray:
@@ -163,8 +164,12 @@ if __name__ == '__main__':
     waitms = int(1000 / fps)
     name = "Mustafar"
 
+    if len(sys.argv) > 1:
+        name = sys.argv[1]
+
     # save file configs
     savfile = name + ".mp4"
+    print(f" * Output will be saved to {name}.mp4")
     fourcc = cv.VideoWriter_fourcc(*"mp4v")
     # Video writer
     out = cv.VideoWriter(savfile, fourcc, fps, (width, height))
@@ -177,18 +182,18 @@ if __name__ == '__main__':
     # Anakin's position
     ax, ay = width // 8, height * 2 // 3
 
-    print("Generating fanfare ..")
+    print(" * Generating fanfare ..")
     opening.append(fanfare_logo())
     opening.append(fanfare_me())  # 1
 
-    print("Drawing Mustafar ..")
+    print(" * Drawing Mustafar ..")
     kidsdrawing.append(utils.Mustafar(frame, width // 4).copy())
-    print("Drawing Anakin Skywalker ..")
+    print(" * Drawing Anakin Skywalker ..")
     kidsdrawing.append(utils.Anakin(frame, (ax, ay)).copy())  # 2
-    print("Drawing ObiWan Kenobi ..")
+    print(" * Drawing ObiWan Kenobi ..")
     kidsdrawing.append(utils.ObiWan(frame, (ox, oy)).copy())
     fullscene = frame.copy()
-    print("Inserting quote ..")
+    print(" * Inserting quote ..")
     kidsdrawing.append(
         utils.quote_obiwan(fullscene.copy(), (ox, oy), 0).copy())
     kidsdrawing.append(
@@ -196,11 +201,11 @@ if __name__ == '__main__':
     kidsdrawing.append(utils.quote_anakin(fullscene.copy(), (ax, ay)).copy())
     kidsdrawing.append(
         utils.quote_obiwan(fullscene.copy(), (ox, oy), 2).copy())  # 7
-    print("Generating epilog ..")
+    print(" * Generating epilog ..")
     for i in range(2):
         kidsdrawing.append(utils.epilog(i))  # 9
 
-    print("Generating credits ..")
+    print(" * Generating credits ..")
     ending.append(credits_plot())  # 10
     ending.append(credits_video())
 
