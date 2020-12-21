@@ -4,7 +4,11 @@
 # vim
 .vim/
 
+# Python import cache
 __pycache__/
+
+# Zip archive
+*.zip
 
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 22:01 [CST]
