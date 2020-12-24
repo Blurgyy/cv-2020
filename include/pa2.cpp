@@ -59,6 +59,14 @@ void harris(cv::Mat const &frame, size_t const &wr) {
             eigenmax.at<double>(i, j) = maxe;
         }
     }
+
+    nms(eigenmin);
+    nms(eigenmax);
+
+    cv::imshow("max", eigenmax);
+    cv::waitKey();
+    cv::imshow("min", eigenmin);
+    cv::waitKey();
 }
 
 std::tuple<double, double> eigen(double const &a, double const &b,
@@ -80,6 +88,37 @@ double getsum(cv::Mat const &from, size_t const &rlb, size_t const &clb,
     } else {
         return 0;
     }
+}
+
+cv::Mat nms(cv::Mat &frame, size_t const &wr) {
+    assert(frame.type() == CV_64FC1);
+
+    size_t  ws   = wr * 2 + 1;
+    size_t  rows = frame.rows, row_ub = rows - ws;
+    size_t  cols = frame.cols, col_ub = cols - ws;
+    cv::Mat ret = cv::Mat(rows, cols, CV_64FC1, 1.0);
+
+    for (size_t x = 0; x < col_ub; ++x) {
+        for (size_t y = 0; y < row_ub; ++y) {
+            // Maximum value in current window
+            double maxx = -std::numeric_limits<double>::infinity();
+            for (size_t i = y; i < y + ws; ++i) {
+                for (size_t j = x; j < x + ws; ++j) {
+                    maxx = std::max(maxx, frame.at<double>(i, j));
+                }
+            }
+            // Suppress all non-maximum values
+            for (size_t i = y; i < y + ws; ++i) {
+                for (size_t j = x; j < x + ws; ++j) {
+                    if (frame.at<double>(i, j) < maxx) {
+                        ret.at<double>(i, j) = 0.0;
+                    }
+                }
+            }
+        }
+    }
+
+    return ret;
 }
 
 } // namespace pa2

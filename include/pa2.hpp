@@ -23,6 +23,9 @@ double getsum(cv::Mat const &from, size_t const &rlb, size_t const &clb,
 // @return square of `x`
 template <typename T> T constexpr sq(T const &x) { return x * x; }
 
+// @brief Perfrom non-maximum suppression
+cv::Mat nms(cv::Mat &frame, size_t const &wr = 2);
+
 }; // namespace pa2
 
 // Author: Blurgy <gy@blurgy.xyz>
