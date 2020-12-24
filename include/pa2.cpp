@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include <filesystem>
+
 namespace pa2 {
 
 void harris(cv::Mat const &frame, size_t const &wr) {
@@ -60,13 +62,13 @@ void harris(cv::Mat const &frame, size_t const &wr) {
         }
     }
 
-    nms(eigenmin);
-    nms(eigenmax);
+    nms(eigenmin, wr + 1);
+    nms(eigenmax, wr + 1);
 
-    cv::imshow("max", eigenmax);
-    cv::waitKey();
-    cv::imshow("min", eigenmin);
-    cv::waitKey();
+    // Create directory `img` if it does not exist
+    std::filesystem::create_directory("img");
+    cv::imwrite("img/eigenmax.png", eigenmax);
+    cv::imwrite("img/eigenmin.png", eigenmin);
 }
 
 std::tuple<double, double> eigen(double const &a, double const &b,
