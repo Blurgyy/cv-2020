@@ -10,5 +10,8 @@ __pycache__/
 # Zip archive
 *.zip
 
+# CMake build directory
+build/
+
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 22:01 [CST]
