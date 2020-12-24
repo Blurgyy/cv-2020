@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 
     cv::Mat img = cv::imread(ifile, cv::IMREAD_GRAYSCALE);
 
-    pa2::harris_naive(img);
+    pa2::harris(img);
 
     return 0;
 }

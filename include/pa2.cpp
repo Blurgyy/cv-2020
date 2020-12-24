@@ -4,7 +4,7 @@
 
 namespace pa2 {
 
-void harris_naive(cv::Mat const &frame, size_t const &wr) {
+void harris(cv::Mat const &frame, size_t const &wr) {
     cv::Mat img = frame.clone();
     if (img.channels() == 3) {
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
@@ -44,47 +44,21 @@ void harris_naive(cv::Mat const &frame, size_t const &wr) {
     cv::integral(Ixymat, pIxymat);
     cv::integral(Iyymat, pIyymat);
 
-    // double sum = 0;
-    // int    ilb = 1, iub = 50;
-    // int    jlb = 1, jub = 50;
-    // for (int i = ilb; i < iub; ++i) {
-    // for (int j = jlb; j < jub; ++j) {
-    // sum += Ixxmat.at<double>(i, j);
-    // }
-    // }
-    // printf("%f \\sim %f\n", sum, getsum(pIxxmat, ilb, jlb, iub, jub));
-    // exit(0);
-
     // Iterate each window in image, `i` for y-direction (rows), `j` for
     // x-direction (cols).
     for (size_t i = 0; i < row_ub; ++i) {
         for (size_t j = 0; j < col_ub; ++j) {
-            // Initialize windows
-            cv::Rect win =
-                cv::Rect(static_cast<int>(j), static_cast<int>(i),
-                         static_cast<int>(ws), static_cast<int>(ws));
             // Generate covariance matrix
-            // cv::Mat winIx = Ix(win);
-            // cv::Mat winIy = Iy(win);
             double Ixx{getsum(pIxxmat, i, j, i + ws, j + ws)};
             double Ixy{getsum(pIxymat, i, j, i + ws, j + ws)};
             double Iyy{getsum(pIyymat, i, j, i + ws, j + ws)};
-            /* double  Ixx{cv::sum(Ix.mul(Ix))[0]}; */
-            /* double  Ixy{cv::sum(Ix.mul(Iy))[0]}; */
-            /* double  Iyy{cv::sum(Iy.mul(Iy))[0]}; */
             // Compute eigenvalues of covariace matrix
             auto [mine, maxe] = eigen(Ixx, Ixy, Iyy);
-            // printf("(%lu, %lu)\n", i, j);
+            // Assign eigenvalues to corresponding matrices
             eigenmin.at<double>(i, j) = mine;
             eigenmax.at<double>(i, j) = maxe;
         }
-        // printf("Row %zu is processed\n", i);
     }
-    printf("Done\n");
-    cv::imshow("max", eigenmax);
-    cv::waitKey();
-    cv::imshow("min", eigenmin);
-    cv::waitKey();
 }
 
 std::tuple<double, double> eigen(double const &a, double const &b,
@@ -98,8 +72,6 @@ std::tuple<double, double> eigen(double const &a, double const &b,
 double getsum(cv::Mat const &from, size_t const &rlb, size_t const &clb,
               size_t const &rub, size_t const &cub) {
     assert(from.type() == CV_64FC1);
-    // printf("row-dir: [%zu, %zu)\n", rlb, rub);
-    // printf("col-dir: [%zu, %zu)\n", clb, cub);
     if (rlb < rub && clb < cub) {
         double L   = from.at<double>(rub, cub) - from.at<double>(rlb, clb);
         double hor = from.at<double>(rub, cub) - from.at<double>(rlb, cub);
