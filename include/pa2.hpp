@@ -4,8 +4,11 @@
 
 namespace pa2 {
 
+// Constants
+extern cv::Scalar const marker_color;
+
 // @brief Harris corner detector
-void harris(cv::Mat const &frame, size_t const &wr = 1);
+cv::Mat harris(cv::Mat const &frame, size_t const &wr = 1);
 
 // @brief Compute eigenvalues of given symmetric matrix [a, b; b, c].
 // @return A tuple with {minEvalue, maxEvalue}.
@@ -23,8 +26,8 @@ double getsum(cv::Mat const &from, size_t const &rlb, size_t const &clb,
 // @return square of `x`
 template <typename T> T constexpr sq(T const &x) { return x * x; }
 
-// @brief Perfrom non-maximum suppression
-cv::Mat nms(cv::Mat &frame, size_t const &wr = 2);
+// @brief Perfrom non-maximum suppression with thresholding
+cv::Mat nms(cv::Mat const &frame);
 
 }; // namespace pa2
 

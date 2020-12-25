@@ -6,8 +6,13 @@
 
 namespace pa2 {
 
-void harris(cv::Mat const &frame, size_t const &wr) {
+// Constants
+cv::Scalar const marker_color{254, 3, 151};
+
+cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
+    printf("Harris ..\n");
     cv::Mat img = frame.clone();
+    cv::Mat ret = frame.clone();
     if (img.channels() == 3) {
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
     }
@@ -62,13 +67,28 @@ void harris(cv::Mat const &frame, size_t const &wr) {
         }
     }
 
-    nms(eigenmin, wr + 1);
-    nms(eigenmax, wr + 1);
+    // Non-maximum suppression with slightly larger window radius
+    eigenmin = nms(eigenmin);
+    eigenmax = nms(eigenmax);
 
     // Create directory `img` if it does not exist
     std::filesystem::create_directory("img");
+    // Save max/min eigenvalue images to file
     cv::imwrite("img/eigenmax.png", eigenmax);
     cv::imwrite("img/eigenmin.png", eigenmin);
+
+    // Draw markers at detected corners
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            if (eigenmin.at<unsigned char>(i, j) >= 128) {
+                printf("Drawing circle at (%zu, %zu)\n", i, j);
+                break;
+                cv::circle(ret, cv::Point2i(i, j), wr * 10, marker_color);
+            }
+        }
+    }
+
+    return ret;
 }
 
 std::tuple<double, double> eigen(double const &a, double const &b,
@@ -92,33 +112,62 @@ double getsum(cv::Mat const &from, size_t const &rlb, size_t const &clb,
     }
 }
 
-cv::Mat nms(cv::Mat &frame, size_t const &wr) {
+cv::Mat nms(cv::Mat const &frame) {
     assert(frame.type() == CV_64FC1);
+    printf("NMS ..\n");
 
-    size_t  ws   = wr * 2 + 1;
-    size_t  rows = frame.rows, row_ub = rows - ws;
-    size_t  cols = frame.cols, col_ub = cols - ws;
-    cv::Mat ret = cv::Mat(rows, cols, CV_64FC1, 1.0);
+    cv::Mat ret = frame.clone();
+    cv::normalize(ret, ret, 255.5, 0, cv::NORM_MINMAX);
+    unsigned char th = 127;
+    cv::threshold(ret, ret, th, 255, cv::THRESH_BINARY);
 
-    for (size_t x = 0; x < col_ub; ++x) {
-        for (size_t y = 0; y < row_ub; ++y) {
-            // Maximum value in current window
-            double maxx = -std::numeric_limits<double>::infinity();
-            for (size_t i = y; i < y + ws; ++i) {
-                for (size_t j = x; j < x + ws; ++j) {
-                    maxx = std::max(maxx, frame.at<double>(i, j));
-                }
-            }
-            // Suppress all non-maximum values
-            for (size_t i = y; i < y + ws; ++i) {
-                for (size_t j = x; j < x + ws; ++j) {
-                    if (frame.at<double>(i, j) < maxx) {
-                        ret.at<double>(i, j) = 0.0;
-                    }
-                }
-            }
-        }
-    }
+    cv::imshow("Harris", ret);
+    cv::waitKey();
+
+    return ret;
+
+    // cv::Mat inter, ret;
+
+    // cv::dilate(frame, inter, cv::Mat());
+    // cv::compare(frame, inter, inter, cv::CMP_GE);
+
+    // cv::erode(frame, ret, cv::Mat());
+    // cv::compare(frame, ret, ret, cv::CMP_GT);
+    // cv::bitwise_and(inter, ret, ret);
+
+    // return ret;
+
+    // size_t  rows = frame.rows;
+    // size_t  cols = frame.cols;
+    // size_t  ws   = std::min(rows, cols) / 50;
+    // cv::Mat ret(rows, cols, CV_8UC1);
+
+    // for (size_t x = 0; x < cols; x += ws) {
+    // for (size_t y = 0; y < rows; y += ws) {
+    // // Maximum value in current window
+    // double maxx = -std::numeric_limits<double>::infinity();
+    // for (size_t i = y; i < std::min(rows, y + ws); ++i) {
+    // for (size_t j = x; j < std::min(cols, x + ws); ++j) {
+    // maxx = std::max(maxx, frame.at<double>(i, j));
+    // }
+    // }
+    // // Suppress all non-maximum values
+    // for (size_t i = y; i < std::min(rows, y + ws); ++i) {
+    // for (size_t j = x; j < std::min(rows, x + ws); ++j) {
+    // // printf("value is %f, maxx is %f\n",
+    // // frame.at<double>(i, j), maxx);
+    // if (frame.at<double>(i, j) == maxx) {
+    // ret.at<unsigned char>(i, j) = 255;
+    // } else {
+    // ret.at<unsigned char>(i, j) = 0;
+    // }
+    // }
+    // }
+    // }
+    // }
+
+    // cv::imshow("Harris", ret);
+    // cv::waitKey();
 
     return ret;
 }
