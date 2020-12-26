@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
         timer.end();
         fprintf(stderr, "Harris corner detected in %.0f milliseconds\n\n",
                 timer.elapsedms());
+        cv::imwrite("img/detected.png", detected);
         cv::imshow("Harris", detected);
         while (key != 'q') {
             key = cv::waitKey();
