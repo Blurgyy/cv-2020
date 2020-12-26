@@ -27,6 +27,9 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${target_name} ${OpenCV_LIBS})
 
+# OpenMP
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+
 # Custom utilities
 add_subdirectory(include)
 include_directories(include)

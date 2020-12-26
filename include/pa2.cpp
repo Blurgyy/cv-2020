@@ -1,13 +1,14 @@
 #include "pa2.hpp"
 
-#include <cmath>
+#include <omp.h>
 
+#include <cmath>
 #include <filesystem>
 
 namespace pa2 {
 
 // Constants
-cv::Scalar const marker_color{254, 3, 151};
+cv::Scalar const marker_color{193, 52, 20};
 
 cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     printf("Harris ..\n");
@@ -25,13 +26,6 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     size_t rows = img.rows, row_ub = rows - ws;
     size_t cols = img.cols, col_ub = cols - ws;
 
-    // Minimum eigen value of each window
-    cv::Mat eigenmin =
-        cv::Mat(static_cast<int>(rows), static_cast<int>(cols), CV_64FC1);
-    // Maximum eigen value of each window
-    cv::Mat eigenmax =
-        cv::Mat(static_cast<int>(rows), static_cast<int>(cols), CV_64FC1);
-
     // Windows
     cv::Rect win_global  = cv::Rect{0, 0, static_cast<int>(cols - 1),
                                    static_cast<int>(rows - 1)};
@@ -40,20 +34,29 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     cv::Rect ywin_global = cv::Rect{0, 1, static_cast<int>(cols - 1),
                                     static_cast<int>(rows - 1)};
     // Gradient images
-    cv::Mat Ix = img(xwin_global) - img(win_global);
-    cv::Mat Iy = img(ywin_global) - img(win_global);
+    cv::Mat Ixmat = img(xwin_global) - img(win_global);
+    cv::Mat Iymat = img(ywin_global) - img(win_global);
     // Precomputes
-    cv::Mat Ixxmat = Ix.mul(Ix);
-    cv::Mat Ixymat = Ix.mul(Iy);
-    cv::Mat Iyymat = Iy.mul(Iy);
+    cv::Mat Ixxmat = Ixmat.mul(Ixmat);
+    cv::Mat Ixymat = Ixmat.mul(Iymat);
+    cv::Mat Iyymat = Iymat.mul(Iymat);
+
     cv::Mat pIxxmat, pIxymat, pIyymat;
     cv::integral(Ixxmat, pIxxmat);
     cv::integral(Ixymat, pIxymat);
     cv::integral(Iyymat, pIyymat);
 
+    // Minimum eigen value of each window
+    cv::Mat eigenmin =
+        cv::Mat(static_cast<int>(rows), static_cast<int>(cols),
+                CV_64FC1); // Maximum eigen value of each window
+    cv::Mat eigenmax =
+        cv::Mat(static_cast<int>(rows), static_cast<int>(cols), CV_64FC1);
+
     // Iterate each window in image, `i` for y-direction (rows), `j` for
     // x-direction (cols).
     for (size_t i = 0; i < row_ub; ++i) {
+#pragma omp parallel for
         for (size_t j = 0; j < col_ub; ++j) {
             // Generate covariance matrix
             double Ixx{getsum(pIxxmat, i, j, i + ws, j + ws)};
@@ -73,14 +76,16 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     cv::imwrite("img/eigenmax.png", eigenmax);
     cv::imwrite("img/eigenmin.png", eigenmin);
 
-    // Non-maximum suppression with slightly larger window radius
+    // Non-maximum suppression
     eigenmin = nms(eigenmin);
-    eigenmax = nms(eigenmax);
+    // // No need of NMS for eigenmax
+    // eigenmax = nms(eigenmax);
 
     // Draw markers at detected corners
     for (size_t i = 0; i < rows; ++i) {
+#pragma omp parallel for
         for (size_t j = 0; j < cols; ++j) {
-            if (eigenmin.at<unsigned char>(i, j) >= 128) {
+            if (eigenmin.at<unsigned char>(i, j) == 255) {
                 cv::circle(ret, cv::Point2i(j, i), wr * 10, marker_color);
             }
         }
@@ -141,6 +146,7 @@ cv::Mat nms(cv::Mat const &frame) {
 
     // Thresholding.
     for (int i = 0; i < ret.rows; ++i) {
+#pragma omp parallel for
         for (int j = 0; j < ret.cols; ++j) {
             if (frame.at<double>(i, j) > threshold) {
                 ret.at<unsigned char>(i, j) = 255;
