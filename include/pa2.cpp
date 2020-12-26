@@ -67,23 +67,21 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
         }
     }
 
+    // Create directory `img` if it does not exist.
+    std::filesystem::create_directory("img");
+    // Save max/min eigenvalue images to file, before non-maximum suppression.
+    cv::imwrite("img/eigenmax.png", eigenmax);
+    cv::imwrite("img/eigenmin.png", eigenmin);
+
     // Non-maximum suppression with slightly larger window radius
     eigenmin = nms(eigenmin);
     eigenmax = nms(eigenmax);
-
-    // Create directory `img` if it does not exist
-    std::filesystem::create_directory("img");
-    // Save max/min eigenvalue images to file
-    cv::imwrite("img/eigenmax.png", eigenmax);
-    cv::imwrite("img/eigenmin.png", eigenmin);
 
     // Draw markers at detected corners
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
             if (eigenmin.at<unsigned char>(i, j) >= 128) {
-                printf("Drawing circle at (%zu, %zu)\n", i, j);
-                break;
-                cv::circle(ret, cv::Point2i(i, j), wr * 10, marker_color);
+                cv::circle(ret, cv::Point2i(j, i), wr * 10, marker_color);
             }
         }
     }
@@ -116,58 +114,41 @@ cv::Mat nms(cv::Mat const &frame) {
     assert(frame.type() == CV_64FC1);
     printf("NMS ..\n");
 
-    cv::Mat ret = frame.clone();
-    cv::normalize(ret, ret, 255.5, 0, cv::NORM_MINMAX);
-    unsigned char th = 127;
-    cv::threshold(ret, ret, th, 255, cv::THRESH_BINARY);
+    int rows = frame.rows;
+    int cols = frame.cols;
+    int size = rows * cols;
 
-    cv::imshow("Harris", ret);
-    cv::waitKey();
+    cv::Mat ret(frame.rows, frame.cols, CV_8UC1);
 
-    return ret;
+    double maxintensity = -1;
+    double median       = 0;
+    double threshold    = -1;
 
-    // cv::Mat inter, ret;
+    std::vector<double> array;
+    for (int i = 0; i < frame.rows; ++i) {
+        auto x = frame.ptr<double>(i);
+        for (int j = 0; j < frame.cols; ++j) {
+            array.push_back(x[j]);
+        }
+    }
+    int reserved = std::max(30, (int)(.0001 * size));
+    int offset   = size - reserved;
+    printf("reserved: %d, offset: %d, size: %d\n", reserved, offset, size);
+    std::nth_element(array.begin(), array.begin() + offset, array.end());
+    median    = array[offset];
+    threshold = median;
+    printf("threshold is %f\n", threshold);
 
-    // cv::dilate(frame, inter, cv::Mat());
-    // cv::compare(frame, inter, inter, cv::CMP_GE);
-
-    // cv::erode(frame, ret, cv::Mat());
-    // cv::compare(frame, ret, ret, cv::CMP_GT);
-    // cv::bitwise_and(inter, ret, ret);
-
-    // return ret;
-
-    // size_t  rows = frame.rows;
-    // size_t  cols = frame.cols;
-    // size_t  ws   = std::min(rows, cols) / 50;
-    // cv::Mat ret(rows, cols, CV_8UC1);
-
-    // for (size_t x = 0; x < cols; x += ws) {
-    // for (size_t y = 0; y < rows; y += ws) {
-    // // Maximum value in current window
-    // double maxx = -std::numeric_limits<double>::infinity();
-    // for (size_t i = y; i < std::min(rows, y + ws); ++i) {
-    // for (size_t j = x; j < std::min(cols, x + ws); ++j) {
-    // maxx = std::max(maxx, frame.at<double>(i, j));
-    // }
-    // }
-    // // Suppress all non-maximum values
-    // for (size_t i = y; i < std::min(rows, y + ws); ++i) {
-    // for (size_t j = x; j < std::min(rows, x + ws); ++j) {
-    // // printf("value is %f, maxx is %f\n",
-    // // frame.at<double>(i, j), maxx);
-    // if (frame.at<double>(i, j) == maxx) {
-    // ret.at<unsigned char>(i, j) = 255;
-    // } else {
-    // ret.at<unsigned char>(i, j) = 0;
-    // }
-    // }
-    // }
-    // }
-    // }
-
-    // cv::imshow("Harris", ret);
-    // cv::waitKey();
+    // Thresholding.
+    for (int i = 0; i < ret.rows; ++i) {
+        for (int j = 0; j < ret.cols; ++j) {
+            if (frame.at<double>(i, j) > threshold) {
+                ret.at<unsigned char>(i, j) = 255;
+            } else {
+                ret.at<unsigned char>(i, j) = 0;
+            }
+        }
+    }
 
     return ret;
 }

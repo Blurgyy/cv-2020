@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
             if (key == ' ') {
                 paused = !paused;
                 if (paused) {
-                    marked = pa2::harris(img, 5);
+                    marked = pa2::harris(img, 1);
                 }
             }
             if (paused) {
