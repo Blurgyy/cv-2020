@@ -8,7 +8,7 @@
 namespace pa2 {
 
 // Constants
-cv::Scalar const marker_color{193, 52, 20};
+cv::Scalar const marker_color{20, 89, 200};
 
 cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     printf("Harris ..\n");
