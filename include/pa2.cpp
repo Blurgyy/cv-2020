@@ -71,7 +71,9 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     }
 
     // Create directory `img` if it does not exist.
-    std::filesystem::create_directory("img");
+    if (!std::filesystem::exists("img")) {
+        std::filesystem::create_directory("img");
+    }
     // Save max/min eigenvalue images to file, before non-maximum suppression.
     cv::imwrite("img/eigenmax.png", eigenmax);
     cv::imwrite("img/eigenmin.png", eigenmin);
