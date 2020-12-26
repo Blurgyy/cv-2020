@@ -11,7 +11,6 @@ namespace pa2 {
 cv::Scalar const marker_color{20, 89, 200};
 
 cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
-    printf("Harris ..\n");
     cv::Mat img = frame.clone();
     cv::Mat ret = frame.clone();
     if (img.channels() == 3) {
@@ -53,6 +52,7 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     cv::Mat eigenmax =
         cv::Mat(static_cast<int>(rows), static_cast<int>(cols), CV_64FC1);
 
+    printf("Computing max/min eigenvalues in each window..\n");
     // Iterate each window in image, `i` for y-direction (rows), `j` for
     // x-direction (cols).
     for (size_t i = 0; i < row_ub; ++i) {
@@ -70,6 +70,7 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
         }
     }
 
+    printf("Saving max/min eigenvalues ..\n");
     // Create directory `img` if it does not exist.
     if (!std::filesystem::exists("img")) {
         std::filesystem::create_directory("img");
@@ -83,6 +84,7 @@ cv::Mat harris(cv::Mat const &frame, size_t const &wr) {
     // // No need of NMS for eigenmax
     // eigenmax = nms(eigenmax);
 
+    printf("Drawing markers at detected corners ..\n");
     // Draw markers at detected corners
     for (size_t i = 0; i < rows; ++i) {
 #pragma omp parallel for
@@ -119,7 +121,6 @@ double getsum(cv::Mat const &from, size_t const &rlb, size_t const &clb,
 
 cv::Mat nms(cv::Mat const &frame) {
     assert(frame.type() == CV_64FC1);
-    printf("NMS ..\n");
 
     int rows = frame.rows;
     int cols = frame.cols;
@@ -140,11 +141,9 @@ cv::Mat nms(cv::Mat const &frame) {
     }
     int reserved = std::max(30, (int)(.0001 * size));
     int offset   = size - reserved;
-    printf("reserved: %d, offset: %d, size: %d\n", reserved, offset, size);
     std::nth_element(array.begin(), array.begin() + offset, array.end());
     median    = array[offset];
     threshold = median;
-    printf("threshold is %f\n", threshold);
 
     // Thresholding.
     for (int i = 0; i < ret.rows; ++i) {

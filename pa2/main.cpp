@@ -1,3 +1,4 @@
+#include "Timer.hpp"
 #include "pa2.hpp"
 
 #include <opencv2/opencv.hpp>
@@ -23,6 +24,8 @@ int main(int argc, char **argv) {
     bool paused = false;
     // Object to store marked image
     cv::Mat detected;
+    // Timer object for benchmarking
+    Timer timer;
 
     /* [/Variables] */
     /****************/
@@ -40,8 +43,13 @@ int main(int argc, char **argv) {
     /* [/Parse args] */
 
     if (isimage) {
-        img      = cv::imread(ifile, cv::IMREAD_COLOR);
+        img = cv::imread(ifile, cv::IMREAD_COLOR);
+        fprintf(stderr, "frame size is %dx%d\n", img.cols, img.rows);
+        timer.start();
         detected = pa2::harris(img, 1);
+        timer.end();
+        fprintf(stderr, "Time elapsed: %.0f milliseconds\n",
+                timer.elapsedms());
         cv::imshow("Harris", detected);
         while (key != 'q') {
             key = cv::waitKey();
@@ -59,7 +67,13 @@ int main(int argc, char **argv) {
             if (key == ' ') {
                 paused = !paused;
                 if (paused) {
+                    fprintf(stderr, "frame size is %dx%d\n", img.cols,
+                            img.rows);
+                    timer.start();
                     detected = pa2::harris(img, 1);
+                    timer.end();
+                    fprintf(stderr, "Time elapsed: %.0f milliseconds\n",
+                            timer.elapsedms());
                     // directory `img/` should be created in function
                     // `pa2::harris()`
                     cv::imwrite("img/detected.png", detected);

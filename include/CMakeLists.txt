@@ -15,7 +15,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 # # Build an executable:
 # add_executable(${target_name} "${sources}")
 # # Or, build a library to be linked:
-add_library(pa2 STATIC pa2.cpp)
+add_library(pa2 STATIC
+    Timer.cpp
+    pa2.cpp
+)
 # add_library(${target_name} SHARED)
 # add_library(${target_name} MODULE)  # I have no idea what this is.
 
