@@ -128,9 +128,8 @@ cv::Mat nms(cv::Mat const &frame) {
 
     cv::Mat ret(frame.rows, frame.cols, CV_8UC1);
 
-    double maxintensity = -1;
-    double median       = 0;
-    double threshold    = -1;
+    double median    = 0;
+    double threshold = -1;
 
     std::vector<double> array;
     for (int i = 0; i < frame.rows; ++i) {
