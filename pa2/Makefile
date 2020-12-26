@@ -4,13 +4,13 @@ builddir = build
 
 makeflags = -j$(shell expr $(shell nproc) - 1) # Parallel compiling
 
-debug: ${srcs} CMakeLists.txt
-	cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-		-DCMAKE_BUILD_TYPE="Debug"
-	@make -C ${builddir} ${makeflags}
 release: ${srcs} CMakeLists.txt
 	cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
 		-DCMAKE_BUILD_TYPE="Release"
+	@make -C ${builddir} ${makeflags}
+debug: ${srcs} CMakeLists.txt
+	cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+		-DCMAKE_BUILD_TYPE="Debug"
 	@make -C ${builddir} ${makeflags}
 clean:
 	@make -C ${builddir} clean
