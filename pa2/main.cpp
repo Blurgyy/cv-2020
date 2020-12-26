@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
         timer.start();
         detected = pa2::harris(img, 1);
         timer.end();
-        fprintf(stderr, "Time elapsed: %.0f milliseconds\n",
+        fprintf(stderr, "Harris corner detected in %.0f milliseconds\n\n",
                 timer.elapsedms());
         cv::imshow("Harris", detected);
         while (key != 'q') {
@@ -72,7 +72,8 @@ int main(int argc, char **argv) {
                     timer.start();
                     detected = pa2::harris(img, 1);
                     timer.end();
-                    fprintf(stderr, "Time elapsed: %.0f milliseconds\n",
+                    fprintf(stderr,
+                            "Harris corner detected in %.0f milliseconds\n\n",
                             timer.elapsedms());
                     // directory `img/` should be created in function
                     // `pa2::harris()`
