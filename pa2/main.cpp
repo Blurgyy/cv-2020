@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     // If video is paused
     bool paused = false;
     // Object to store marked image
-    cv::Mat marked;
+    cv::Mat detected;
 
     /* [/Variables] */
     /****************/
@@ -40,9 +40,9 @@ int main(int argc, char **argv) {
     /* [/Parse args] */
 
     if (isimage) {
-        img    = cv::imread(ifile, cv::IMREAD_COLOR);
-        marked = pa2::harris(img, 1);
-        cv::imshow("Harris", marked);
+        img      = cv::imread(ifile, cv::IMREAD_COLOR);
+        detected = pa2::harris(img, 1);
+        cv::imshow("Harris", detected);
         while (key != 'q') {
             key = cv::waitKey();
         }
@@ -59,11 +59,14 @@ int main(int argc, char **argv) {
             if (key == ' ') {
                 paused = !paused;
                 if (paused) {
-                    marked = pa2::harris(img, 1);
+                    detected = pa2::harris(img, 1);
+                    // directory `img/` should be created in function
+                    // `pa2::harris()`
+                    cv::imwrite("img/detected.png", detected);
                 }
             }
             if (paused) {
-                cv::imshow("Harris", marked);
+                cv::imshow("Harris", detected);
                 key = cv::waitKey();
             } else {
                 if (!cap.read(img)) {
