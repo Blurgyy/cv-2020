@@ -11,35 +11,34 @@ class Net(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 32, 3, 1, 1),
             nn.ReLU(),
+            nn.MaxPool2d(2, 2),
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(32, 128, 3, 1, 1),
             nn.ReLU(),
+            nn.MaxPool2d(2, 2),
         )
-        self.pooling1 = nn.MaxPool2d(2, 2)
         self.conv3 = nn.Sequential(
             nn.Conv2d(128, 256, 3, 1, 1),
             nn.ReLU(),
+            nn.MaxPool2d(2, 2),
         )
-        self.pooling2 = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Sequential(
-            nn.Linear(256 * 8 * 8, 8192),
-            nn.BatchNorm1d(8192),
+            nn.Linear(256 * 4 * 4, 2048),
+            nn.BatchNorm1d(2048),
             nn.ReLU(),
         )
         self.fc2 = nn.Sequential(
-            nn.Linear(8192, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(2048, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
         )
-        self.fc3 = nn.Linear(512, 10)
+        self.fc3 = nn.Linear(128, 10)
 
     def forward(self, x):
         z = self.conv1(x)
         z = self.conv2(z)
-        z = self.pooling1(z)
         z = self.conv3(z)
-        z = self.pooling2(z)
         z = z.view(z.size()[0], -1)
         z = self.fc1(z)
         z = self.fc2(z)
