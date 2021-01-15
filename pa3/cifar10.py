@@ -73,10 +73,7 @@ def main():
         train_kwargs.update(cuda_kwargs)
         test_kwargs.update(cuda_kwargs)
 
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        # transforms.Normalize((0.1307,), (0.3081,)),
-    ])
+    transform = transforms.ToTensor()
     training_set = datasets.CIFAR10(
         './datasets/cifar10', train=True, transform=transform, download=True)
     testing_set = datasets.CIFAR10(
@@ -100,7 +97,6 @@ def main():
         train(model, device, train_loader, optimizer, epoch + 1)
         test(model, device, test_loader)
         scheduler.step()
-        print(scheduler.get_last_lr())
 
     if not os.path.exists("./weights"):
         os.makedirs("./weights")
