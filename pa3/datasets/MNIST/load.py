@@ -6,28 +6,49 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def unpickle(file: str, nimages: int):
+def loadimg(imgfile: str, idxfile: str, nimages: int):
     size = 28
-    with open(file, 'rb') as f:
-        f.read(16)  # useless header bits?
+    # Get images
+    with open(imgfile, 'rb') as f:
+        image_header = f.read(16)  # useless header bits?
+        with open("image_header", 'wb') as f2:
+            f2.write(image_header)
         buf = f.read(size * size * nimages)
         data = np.frombuffer(buf, np.uint8)
-    return data.reshape(nimages, size, size, 1)
+    images = data.reshape(nimages, size, size, 1)
+    # Get labels
+    with open(idxfile, 'rb') as f:
+        index_header = f.read(8)
+        with open("index_header", 'wb') as f2:
+            f2.write(index_header)
+        buf = f.read(nimages)
+        data = np.frombuffer(buf, np.uint8)
+    labels = data.reshape(-1)
+    return images, labels
+
+
+def dumpimg(imgfile: str, idxfile: str, data: dict):
+    with open("./image_header", 'rb') as f:
+        image_header = f.read()
+    with open("./index_header", 'rb') as f:
+        index_header = f.read()
 
 
 def main():
-    plist = [
-        {
-            'file': "./raw/train-images-idx3-ubyte",
-            'nimages': 60000,
-        },
-    ]
+    train_set_param = {
+        'imgfile': "./raw/train-images-idx3-ubyte",
+        'idxfile': "./raw/train-labels-idx1-ubyte",
+        'nimages': 60000,
+    }
+    test_set_param = {
+        'imgfile': "./raw/t10k-images-idx3-ubyte",
+        'idxfile': "./raw/t10k-labels-idx1-ubyte",
+        "nimages": 10000,
+    }
 
-    for param in plist:
-        data = unpickle(**param)
-        image = np.asarray(data[2]).squeeze()
-        plt.imshow(image)
-        plt.show()
+    # Augment training set
+    images, labels = loadimg(**train_set_param)
+    print(images.shape, labels.shape)
 
 
 if __name__ == "__main__":
