@@ -60,13 +60,6 @@ class LeNet(nn.Module):
         x = F.log_softmax(x, dim=1)
         return x
 
-    def nfeatures(self, x):
-        size = x.size()[1:]
-        nfeats = 1
-        for s in size:
-            nfeats *= s
-        return nfeats
-
 
 def main():
     net = LeNet()
