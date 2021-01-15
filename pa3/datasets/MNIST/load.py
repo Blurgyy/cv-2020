@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import os
+import sys
 
 
 def loadimg(imgfile: str, idxfile: str, nimages: int):
@@ -19,8 +20,10 @@ def loadimg(imgfile: str, idxfile: str, nimages: int):
         data = np.frombuffer(buf, np.uint8)
     # # 8test8
     # with open("testfile", 'wb') as f:
-    # f.write(image_header)
-    # f.write(data.tobytes())
+    #     f.write(image_header)
+    #     f.write(data.reshape(nimages, size, size, 1).reshape(-1).tobytes())
+    #     # f.write(data.tobytes())
+    # sys.exit()
     # # 8test8
     images = data.reshape(nimages, size, size, 1)
     # Get labels
@@ -41,15 +44,18 @@ def dumpimg(imgfile: str, idxfile: str, data: dict):
         index_header = f.read()
     # Write images
     images = [y for x in range(11) for y in data[x]]
-    images = np.array(images, dtype=np.float)
-    # images = np.array(images).astype(np.uint8)
+    images = np.array(images, dtype=np.uint8)
+    # for img in images:
+    #     plt.figure()
+    #     plt.imshow(img.squeeze())
+    #     plt.show()
     images = images.reshape(-1)
     with open(imgfile, 'wb') as f:
         f.write(image_header)
         f.write(images.tobytes())
     # Write labels
     labels = [idx for idx in range(11) for x in range(len(data[idx]))]
-    labels = np.array(labels).astype(np.uint8)
+    labels = np.array(labels, dtype=np.uint8)
     labels = labels.reshape(-1)
     with open(idxfile, 'wb') as f:
         f.write(index_header)
@@ -58,13 +64,13 @@ def dumpimg(imgfile: str, idxfile: str, data: dict):
 
 def main():
     train_set_param = {
-        'imgfile': "./raw/train-images-idx3-ubyte",
-        'idxfile': "./raw/train-labels-idx1-ubyte",
+        'imgfile': "./original/train-images-idx3-ubyte",
+        'idxfile': "./original/train-labels-idx1-ubyte",
         'nimages': 60000,
     }
     test_set_param = {
-        'imgfile': "./raw/t10k-images-idx3-ubyte",
-        'idxfile': "./raw/t10k-labels-idx1-ubyte",
+        'imgfile': "./original/t10k-images-idx3-ubyte",
+        'idxfile': "./original/t10k-labels-idx1-ubyte",
         "nimages": 10000,
     }
 
@@ -101,22 +107,40 @@ def main():
         test_dict[10].append(joined_img)
 
     # Write augmented datasets to file
-    if not os.path.exists("./mine"):
-        os.makedirs("./mine")
+    if not os.path.exists("./raw"):
+        os.makedirs("./raw")
     dumpimg(
-        os.path.join("mine", "train-images"),
-        os.path.join("mine", "train-labels"),
+        os.path.join("raw", "train-images-idx3-ubyte"),
+        os.path.join("raw", "train-labels-idx1-ubyte"),
         train_dict,
     )
     dumpimg(
-        os.path.join("mine", "test-images"),
-        os.path.join("mine", "test-labels"),
+        os.path.join("raw", "t10k-images-idx3-ubyte"),
+        os.path.join("raw", "t10k-labels-idx1-ubyte"),
         test_dict,
     )
 
 
+def test():
+    param = {
+        'imgfile': "./raw/train-images-idx3-ubyte",
+        'idxfile': "./raw/train-labels-idx1-ubyte",
+        'nimages': 66000,
+    }
+    images, labels = loadimg(**param)
+    for _ in range(10):
+        idx = random.randint(0, len(images) - 1)
+        img = images[idx]
+        lab = labels[idx]
+        print(lab)
+        plt.figure()
+        plt.imshow(img.squeeze())
+        plt.show()
+
+
 if __name__ == "__main__":
     main()
+    # test()
 
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Jan 15 2021, 15:59 [CST]
