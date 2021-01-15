@@ -14,7 +14,7 @@ class LeNet(nn.Module):
         fc_input = 6 * 6 * 16
         fc_h1 = 120
         fc_h2 = 84
-        fc_output = 10
+        fc_output = 11
 
         super().__init__()
         self.conv1 = nn.Sequential(

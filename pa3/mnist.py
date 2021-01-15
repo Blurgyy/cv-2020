@@ -48,6 +48,10 @@ def test(
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
+            # print(output)
+            # print(output.argmax(dim=1, keepdim=True))
+            # print(target)
+            # input()
             test_loss += F.nll_loss(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()

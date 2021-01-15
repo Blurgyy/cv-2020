@@ -7,6 +7,7 @@ import numpy as np
 import random
 import os
 import sys
+import torch
 
 
 def loadimg(imgfile: str, idxfile: str, nimages: int):
@@ -62,6 +63,47 @@ def dumpimg(imgfile: str, idxfile: str, data: dict):
         f.write(labels.tobytes())
 
 
+def dump_processed(
+        traindata: dict,
+        testdata: dict,
+        device=torch.device("cuda"),
+):
+    if not os.path.exists("./processed"):
+        os.makedirs("./processed")
+    trainfile = os.path.join("processed", "training.pt")
+    testfile = os.path.join("processed", "test.pt")
+
+    # Training
+    images = [y for x in range(11) for y in traindata[x]]
+    labels = [idx for idx in range(11) for x in range(len(traindata[idx]))]
+    # items = [(images[i], labels[i]) for i in range(len(images))]
+    # random.shuffle(items)
+    # images = [x[0] for x in items]
+    # labels = [x[1] for x in items]
+
+    images = np.array(images, dtype=np.uint8).reshape((-1, 28, 28))
+    images = torch.from_numpy(images)
+    labels = np.array(labels, dtype=np.int64).reshape(-1)
+    labels = torch.from_numpy(labels)
+
+    torch.save((images, labels), trainfile)
+
+    # Testing
+    images = [y for x in range(11) for y in testdata[x]]
+    labels = [idx for idx in range(11) for x in range(len(testdata[idx]))]
+    # items = [(images[i], labels[i]) for i in range(len(images))]
+    # random.shuffle(items)
+    # images = [x[0] for x in items]
+    # labels = [x[1] for x in items]
+
+    images = np.array(images, dtype=np.uint8).reshape((-1, 28, 28))
+    images = torch.from_numpy(images)
+    labels = np.array(labels, dtype=np.int64).reshape(-1)
+    labels = torch.from_numpy(labels)
+
+    torch.save((images, labels), testfile)
+
+
 def main():
     train_set_param = {
         'imgfile': "./original/train-images-idx3-ubyte",
@@ -109,16 +151,7 @@ def main():
     # Write augmented datasets to file
     if not os.path.exists("./raw"):
         os.makedirs("./raw")
-    dumpimg(
-        os.path.join("raw", "train-images-idx3-ubyte"),
-        os.path.join("raw", "train-labels-idx1-ubyte"),
-        train_dict,
-    )
-    dumpimg(
-        os.path.join("raw", "t10k-images-idx3-ubyte"),
-        os.path.join("raw", "t10k-labels-idx1-ubyte"),
-        test_dict,
-    )
+    dump_processed(train_dict, test_dict, torch.device("cpu"))
 
 
 def test():
