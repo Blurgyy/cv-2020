@@ -78,9 +78,9 @@ def main():
         # transforms.Normalize((0.1307,), (0.3081,)),
     ])
     training_set = datasets.CIFAR10(
-        './cifar10', train=True, transform=transform, download=True)
+        './datasets/cifar10', train=True, transform=transform, download=True)
     testing_set = datasets.CIFAR10(
-        './cifar10', train=False, transform=transform)
+        './datasets/cifar10', train=False, transform=transform)
     train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)
 
