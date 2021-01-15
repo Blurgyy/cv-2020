@@ -6,7 +6,6 @@
 # mode='Verbose', color_scheme='Linux', call_pdb=False)
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 
 from torchvision import datasets, transforms
@@ -27,7 +26,7 @@ def train(
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = nn.CrossEntropyLoss()(output, target)
+        loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
         if batch_id % interval == 0:
@@ -48,7 +47,7 @@ def test(
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss = nn.CrossEntropyLoss()(output, target).item()
+            test_loss += F.nll_loss(output, target).item()
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
     test_loss /= len(test_loader.dataset)
@@ -75,7 +74,7 @@ def main():
 
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
+        # transforms.Normalize((0.1307,), (0.3081,)),
     ])
     training_set = datasets.MNIST(
         './mnist', train=True, transform=transform, download=True)
@@ -96,10 +95,11 @@ def main():
         gamma=0.7,
     )
 
-    for epoch in range(0, 10):
+    for epoch in range(0, 3):
         train(model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
         scheduler.step()
+        print(scheduler.get_last_lr())
 
     torch.save(model.state_dict(), "lenet-mnist.pt")
 

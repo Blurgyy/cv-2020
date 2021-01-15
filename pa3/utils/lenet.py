@@ -22,6 +22,7 @@ class LeNet(nn.Module):
                 in_channels=conv_input,
                 out_channels=conv_hidden1,
                 kernel_size=3,
+                stride=1,
                 padding=2,
             ),
             nn.ReLU(),
@@ -32,22 +33,22 @@ class LeNet(nn.Module):
                 in_channels=conv_hidden1,
                 out_channels=conv_output,
                 kernel_size=3,
+                stride=1,
             ),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
         )
         self.fc1 = nn.Sequential(
             nn.Linear(in_features=fc_input, out_features=fc_h1),
+            nn.BatchNorm1d(fc_h1),
             nn.ReLU(),
         )
         self.fc2 = nn.Sequential(
             nn.Linear(in_features=fc_h1, out_features=fc_h2),
+            nn.BatchNorm1d(fc_h2),
             nn.ReLU(),
         )
-        self.fc3 = nn.Sequential(
-            nn.Linear(in_features=fc_h2, out_features=fc_output),
-            nn.ReLU(),
-        )
+        self.fc3 = nn.Linear(in_features=fc_h2, out_features=fc_output)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -56,12 +57,7 @@ class LeNet(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.fc3(x)
-        # x = F.max_pool2d(F.relu(self.conv1(x)), 2)
-        # x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        # x = x.view(-1, self.nfeatures(x))
-        # x = F.relu(self.fc1(x))
-        # x = F.relu(self.fc2(x))
-        # x = self.fc3(x)
+        x = F.log_softmax(x, dim=1)
         return x
 
     def nfeatures(self, x):
