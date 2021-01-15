@@ -7,6 +7,7 @@
 
 import torch
 import torch.nn.functional as F
+import os
 
 from torchvision import datasets, transforms
 
@@ -101,7 +102,9 @@ def main():
         scheduler.step()
         print(scheduler.get_last_lr())
 
-    torch.save(model.state_dict(), "lenet-mnist.pt")
+    if not os.path.exists("./weights"):
+        os.makedirs("./weights")
+    torch.save(model.state_dict(), "./weights/lenet-mnist.pt")
 
 
 if __name__ == "__main__":
