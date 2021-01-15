@@ -92,19 +92,19 @@ def main():
     )
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer,
-        step_size=1,
+        step_size=2,
         gamma=0.7,
     )
 
-    for epoch in range(0, 3):
-        train(model, device, train_loader, optimizer, epoch)
+    for epoch in range(0, 16):
+        train(model, device, train_loader, optimizer, epoch + 1)
         test(model, device, test_loader)
         scheduler.step()
         print(scheduler.get_last_lr())
 
     if not os.path.exists("./weights"):
         os.makedirs("./weights")
-    torch.save(model.state_dict(), "./weights/lenet-mnist.pt")
+    torch.save(model.state_dict(), "./weights/cnn-cifar10.pt")
 
 
 if __name__ == "__main__":

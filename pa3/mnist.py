@@ -96,8 +96,8 @@ def main():
         gamma=0.7,
     )
 
-    for epoch in range(0, 3):
-        train(model, device, train_loader, optimizer, epoch)
+    for epoch in range(0, 5):
+        train(model, device, train_loader, optimizer, epoch + 1)
         test(model, device, test_loader)
         scheduler.step()
         print(scheduler.get_last_lr())
