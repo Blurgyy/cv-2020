@@ -11,11 +11,11 @@ import os
 
 from torchvision import datasets, transforms
 
-from utils.lenet import LeNet
+import utils
 
 
 def train(
-    model: LeNet,
+    model: utils.LeNet,
     device,
     train_loader: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
@@ -37,7 +37,7 @@ def train(
 
 
 def test(
-    model: LeNet,
+    model: utils.LeNet,
     device,
     test_loader: torch.utils.data.DataLoader,
 ):
@@ -83,7 +83,7 @@ def main():
     train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)
 
-    model = LeNet().to(device)
+    model = utils.LeNet().to(device)
     # model = Net().to(device)
 
     optimizer = torch.optim.Adadelta(
