@@ -7,33 +7,41 @@ import torch.nn.functional as F
 class Net(nn.Module):
 
     def __init__(self):
+        conv_in = 3
+        conv_h1 = 32
+        conv_h2 = 128
+        conv_out = 256
+        fc_in = conv_out * 4 * 4
+        fc_h1 = 1024
+        fc_h2 = 76
+        fc_out = 10
         super().__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 32, 3, 1, 1),
+            nn.Conv2d(conv_in, conv_h1, 3, 1, 1),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(32, 128, 3, 1, 1),
+            nn.Conv2d(conv_h1, conv_h2, 3, 1, 1),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
         )
         self.conv3 = nn.Sequential(
-            nn.Conv2d(128, 256, 3, 1, 1),
+            nn.Conv2d(conv_h2, conv_out, 3, 1, 1),
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
         )
         self.fc1 = nn.Sequential(
-            nn.Linear(256 * 4 * 4, 2048),
-            nn.BatchNorm1d(2048),
+            nn.Linear(fc_in, fc_h1),
+            nn.BatchNorm1d(fc_h1),
             nn.ReLU(),
         )
         self.fc2 = nn.Sequential(
-            nn.Linear(2048, 128),
-            nn.BatchNorm1d(128),
+            nn.Linear(fc_h1, fc_h2),
+            nn.BatchNorm1d(fc_h2),
             nn.ReLU(),
         )
-        self.fc3 = nn.Linear(128, 10)
+        self.fc3 = nn.Linear(fc_h2, fc_out)
 
     def forward(self, x):
         z = self.conv1(x)
