@@ -54,7 +54,7 @@ def test_cifar10(
 
 def main():
     mnist_weights = os.path.join("./weights", "lenet-mnist.pt")
-    cifar_weights = os.path.join("./weights", "cnn-cifar10.pt")
+    cifar_weights = os.path.join("./weights", "cnn-cifar11.pt")
 
     device = torch.device("cuda")
     transform = transforms.ToTensor()
