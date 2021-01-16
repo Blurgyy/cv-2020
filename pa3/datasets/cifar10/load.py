@@ -6,7 +6,7 @@
 def unpickle(file: str):
     import pickle
     with open(file, 'rb') as f:
-        ret = pickle.load(f, encoding='bytes')
+        ret = pickle.load(f, encoding='latin1')
     return ret
 
 
@@ -15,7 +15,10 @@ def main():
         "./cifar-10-batches-py/data_batch_1",
     ]
     for file in flist:
-        print(unpickle(file)[b'file'])
+        data = unpickle(file)
+        for key in data.keys():
+            print(key, type(data[key]))
+        print(data['data'].shape, data['data'].dtype)
 
 
 if __name__ == "__main__":
