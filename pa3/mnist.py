@@ -79,7 +79,7 @@ def main():
 
     transform = transforms.ToTensor()
     training_set = datasets.MNIST(
-        './datasets', train=True, transform=transform, download=True)
+        './datasets', train=True, transform=transform, download=False)
     testing_set = datasets.MNIST(
         './datasets', train=False, transform=transform)
     train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
