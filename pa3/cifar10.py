@@ -74,9 +74,9 @@ def main():
         test_kwargs.update(cuda_kwargs)
 
     transform = transforms.ToTensor()
-    training_set = datasets.CIFAR10(
+    training_set = utils.CIFAR11(
         './datasets/cifar10', train=True, transform=transform, download=True)
-    testing_set = datasets.CIFAR10(
+    testing_set = utils.CIFAR11(
         './datasets/cifar10', train=False, transform=transform)
     train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)

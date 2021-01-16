@@ -14,7 +14,7 @@ class Net(nn.Module):
         fc_in = conv_out * 4 * 4
         fc_h1 = 1024
         fc_h2 = 76
-        fc_out = 10
+        fc_out = 11
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(conv_in, conv_h1, 3, 1, 1),
