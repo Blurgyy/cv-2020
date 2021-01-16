@@ -75,9 +75,9 @@ def main():
 
     transform = transforms.ToTensor()
     training_set = utils.CIFAR11(
-        './datasets/cifar10', train=True, transform=transform, download=True)
+        './datasets/cifar11', train=True, transform=transform, download=True)
     testing_set = utils.CIFAR11(
-        './datasets/cifar10', train=False, transform=transform)
+        './datasets/cifar11', train=False, transform=transform)
     train_loader = torch.utils.data.DataLoader(training_set, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)
 
@@ -100,7 +100,7 @@ def main():
 
     if not os.path.exists("./weights"):
         os.makedirs("./weights")
-    torch.save(model.state_dict(), "./weights/cnn-cifar10.pt")
+    torch.save(model.state_dict(), "./weights/cnn-cifar11.pt")
 
 
 if __name__ == "__main__":

@@ -80,7 +80,7 @@ def main():
         cifar_net.load_state_dict(torch.load(cifar_weights))
         cifar_net = cifar_net.to(device)
         testing_set = utils.CIFAR11(
-            './datasets/cifar10', train=False, transform=transform)
+            './datasets/cifar11', train=False, transform=transform)
         test_loader = torch.utils.data.DataLoader(testing_set, **test_kwargs)
         test_cifar10(cifar_net, device, test_loader)
 
