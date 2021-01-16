@@ -20,7 +20,7 @@ def train(
     train_loader: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
     epoch: int,
-):
+) -> None:
     model.train()
     interval = 10
     for batch_id, (data, target) in enumerate(train_loader):
@@ -40,7 +40,7 @@ def test(
     model: utils.Net,
     device,
     test_loader: torch.utils.data.DataLoader,
-):
+) -> None:
     model.eval()
     test_loss = 0
     correct = 0
