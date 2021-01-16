@@ -25,7 +25,7 @@ def test_mnist(
             correct += pred.eq(target.view_as(pred)).sum().item()
     test_loss /= len(test_loader.dataset)
     print(
-        "\nMNIST evaluation: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n"
+        "\nMNIST evaluation: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n"
         .format(test_loss, correct, len(test_loader.dataset),
                 100. * correct / len(test_loader.dataset)))
 
@@ -47,7 +47,7 @@ def test_cifar10(
             correct += pred.eq(target.view_as(pred)).sum().item()
     test_loss /= len(test_loader.dataset)
     print(
-        "\nCIFAR11 evaluation: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n"
+        "\nCIFAR11 evaluation: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n"
         .format(test_loss, correct, len(test_loader.dataset),
                 100. * correct / len(test_loader.dataset)))
 
