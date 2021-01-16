@@ -40,7 +40,7 @@ def test(
     model: utils.LeNet,
     device,
     test_loader: torch.utils.data.DataLoader,
-) -> None:
+) -> float:
     model.eval()
     test_loss = 0
     correct = 0
@@ -56,9 +56,10 @@ def test(
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
     test_loss /= len(test_loader.dataset)
+    ret = 100. * correct / len(test_loader.dataset)
     print("\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n"
-          .format(test_loss, correct, len(test_loader.dataset),
-                  100. * correct / len(test_loader.dataset)))
+          .format(test_loss, correct, len(test_loader.dataset), ret))
+    return ret
 
 
 def main():
@@ -98,14 +99,16 @@ def main():
         gamma=0.7,
     )
 
+    max_acc = 0
     for epoch in range(0, 5):
         train(model, device, train_loader, optimizer, epoch + 1)
-        test(model, device, test_loader)
+        cur_acc = test(model, device, test_loader)
+        if max_acc < cur_acc:
+            max_acc = cur_acc
+            if not os.path.exists("./weights"):
+                os.makedirs("./weights")
+            torch.save(model.state_dict(), "./weights/lenet-mnist.pt")
         scheduler.step()
-
-    if not os.path.exists("./weights"):
-        os.makedirs("./weights")
-    torch.save(model.state_dict(), "./weights/lenet-mnist.pt")
 
 
 if __name__ == "__main__":
