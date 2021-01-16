@@ -8,8 +8,9 @@
 import torch
 import torch.nn.functional as F
 import os
+import matplotlib.pyplot as plt
 
-from torchvision import datasets, transforms
+from torchvision import transforms
 
 import utils
 
@@ -97,13 +98,21 @@ def main():
     if not os.path.exists("./weights"):
         os.makedirs("./weights")
     max_acc = 0
+    acc_list = []
     for epoch in range(0, 16):
         train(model, device, train_loader, optimizer, epoch + 1)
         cur_acc = test(model, device, test_loader)
+        acc_list.append(cur_acc)
         if max_acc < cur_acc:
             max_acc = cur_acc
             torch.save(model.state_dict(), "./weights/cnn-cifar11.pt")
         scheduler.step()
+
+    # Visualize
+    plt.figure()
+    plt.plot(acc_list)
+    plt.savefig("cifar11.png", dpi=600)
+    plt.show()
 
 
 if __name__ == "__main__":
