@@ -16,5 +16,10 @@ build/
 # Useless file when accidentally type ":w'" in Vim
 '
 
+# Roadmaps
+roadmap.md
+Roadmap.md
+ROADMAP.md
+
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 22:01 [CST]
