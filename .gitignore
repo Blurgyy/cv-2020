@@ -7,8 +7,9 @@
 # Python import cache
 __pycache__/
 
-# Zip archive
+# Archives
 *.zip
+*.tar
 
 # CMake build directory
 build/
