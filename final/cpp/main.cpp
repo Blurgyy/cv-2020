@@ -34,10 +34,10 @@ int main(int argc, char **argv) {
     CamConf                     rconf = confs.second;
     /* [/Parse args] */
 
-    /* [Spatial transformation] */
+    /* [Stereo rectification] */
     cv::Mat l_rect, r_rect;
     stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
-    /* [/Spatial transformation] */
+    /* [/Stereo rectification] */
 
     cv::imwrite("l_rect.jpg", l_rect);
     cv::imwrite("r_rect.jpg", r_rect);
