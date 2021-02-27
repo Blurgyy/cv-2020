@@ -1,3 +1,4 @@
+#include "geometry.hpp"
 #include "globla.hpp"
 
 #include <cassert>

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
-project("cv-final") # Project name
+project("wheels") # Project name
 
-set(target_name "stereo") # Target name (target can be an executable or a library)
+set(target_name "wheels") # Target name (target can be an executable or a library)
 set(sources
-    main.cpp
+    geometry.cpp
     # Sources
 )
 
@@ -18,10 +18,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -w -DNDEBUG")
 # set(CMAKE_BUILD_TYPE "Debug")
 # set(CMAKE_BUILD_TYPE "Release")
 
-# Build an executable:
-add_executable(${target_name} "${sources}")
-# # Or, build a library to be linked:
-# add_library(${target_name} STATIC ${sources})
+# # Build an executable:
+# add_executable(${target_name} "${sources}")
+# Or, build a library to be linked:
+add_library(${target_name} STATIC ${sources})
 # add_library(${target_name} SHARED ${sources})
 # add_library(${target_name} MODULE ${sources})  # I have no idea what this is
 
@@ -41,11 +41,9 @@ target_link_libraries(${target_name} ${OpenCV_LIBS})
 # add_definitions(-DMAGICKCORE_HDRI_ENABLE=1)
 
 # Custom headers, add this after all other dependencies
-include_directories("include")
-add_subdirectory("include")
-target_link_libraries(${target_name} wheels)
+# include_directories("include")
 
 # vim: set ft=cmake:
 
 # Author: Blurgy <gy@blurgy.xyz>
-# Date:   Feb 25 2021, 15:32 [CST]
+# Date:   Feb 27 2021, 16:21 [CST]
