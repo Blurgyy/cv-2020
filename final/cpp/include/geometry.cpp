@@ -11,11 +11,13 @@ SpatialPoint to_camera_space(CamConf const &conf, SpatialPoint const &point) {
     return ret;
 }
 
-SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point) {
+SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point,
+                            flt const &scale, flt const &hor_offset,
+                            flt const &ver_offset) {
     SpatialPoint ret;
     ret.pos = {
-        point.pos.x * conf.fx / point.pos.z + conf.cx,
-        point.pos.y * conf.fy / point.pos.z + conf.cy,
+        point.pos.x * conf.fx * scale / point.pos.z + conf.cx + hor_offset,
+        point.pos.y * conf.fy * scale / point.pos.z + conf.cy + ver_offset,
         1,
     };
     ret.color = point.color;

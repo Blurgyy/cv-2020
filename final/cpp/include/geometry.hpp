@@ -3,7 +3,10 @@
 #include "globla.hpp"
 
 SpatialPoint to_camera_space(CamConf const &conf, SpatialPoint const &point);
-SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point);
+SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point,
+                            flt const &scale      = 1.0,
+                            flt const &hor_offset = 0.0,
+                            flt const &ver_offset = 0.0);
 
 /* Get the reprojection matrix from camera `from` to camera `to`.
  */
