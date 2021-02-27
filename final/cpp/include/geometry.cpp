@@ -94,22 +94,78 @@ void stereo_rectification(cv::Mat const &left_image,
     };
     // clang-format on
     /* 2.1 rotate left image plane */
+    flt lmaxx = std::numeric_limits<flt>::lowest();
+    flt rmaxx = std::numeric_limits<flt>::lowest();
+    flt lmaxy = std::numeric_limits<flt>::lowest();
+    flt rmaxy = std::numeric_limits<flt>::lowest();
+    flt lminx = std::numeric_limits<flt>::max();
+    flt rminx = std::numeric_limits<flt>::max();
+    flt lminy = std::numeric_limits<flt>::max();
+    flt rminy = std::numeric_limits<flt>::max();
+
+    std::vector<vec3> lcamps, rcamps;
     for (int i = 0; i < len; ++i) {
-        vec3 lcoord     = to_camera_space(left_camera, lpts[i]).pos * R_rect;
-        SpatialPoint lp = {lcoord, lpts[i].color};
-        lp              = to_image_space(left_camera, lp);
-        int lx          = std::round(lp.pos[0]);
-        int ly          = std::round(lp.pos[1]);
+        lcamps.push_back(to_camera_space(left_camera, lpts[i]).pos * R_rect);
+        SpatialPoint lp =
+            to_image_space(left_camera, {lcamps[i], lpts[i].color});
+        lmaxx = std::max(lmaxx, lp.pos.x);
+        lminx = std::min(lminx, lp.pos.x);
+        lmaxy = std::max(lmaxy, lp.pos.x);
+        lminy = std::min(lminy, lp.pos.x);
+
+        rcamps.push_back(to_camera_space(right_camera, rpts[i]).pos * R_rect);
+        SpatialPoint rp =
+            to_image_space(right_camera, {rcamps[i], rpts[i].color});
+        rmaxx = std::max(rmaxx, rp.pos.x);
+        rminx = std::min(rminx, rp.pos.x);
+        rmaxy = std::max(rmaxy, rp.pos.x);
+        rminy = std::min(rminy, rp.pos.x);
+    }
+
+    flt lmidx = (lminx + lmaxx) / 2;
+    flt rmidx = (rminx + rmaxx) / 2;
+    flt lmidy = (lminy + lmaxy) / 2;
+    flt rmidy = (rminy + rmaxy) / 2;
+
+    flt left_scale =
+        std::min(static_cast<flt>(left_image.cols) / (lmaxx - lminx),
+                 static_cast<flt>(left_image.rows) / (lmaxy - lminy));
+    flt right_scale =
+        std::min(static_cast<flt>(right_image.cols) / (rmaxx - rminx),
+                 static_cast<flt>(right_image.rows) / (rmaxy - rminy));
+    flt left_hor_offset  = static_cast<flt>(left_image.cols) / 2 - lmidx;
+    flt left_ver_offset  = static_cast<flt>(left_image.rows) / 2 - lmidy;
+    flt right_hor_offset = static_cast<flt>(right_image.cols) / 2 - rmidx;
+    flt right_ver_offset = static_cast<flt>(right_image.rows) / 2 - rmidy;
+
+    flt scale      = (left_scale + right_scale) / 2;
+    flt hor_offset = (left_hor_offset + right_hor_offset) / 2;
+    flt ver_offset = (left_ver_offset + right_ver_offset) / 2;
+
+    // vprintf("left_scale is %f\n", left_scale);
+    // vprintf("right_scale is %f\n", right_scale);
+    // vprintf("left_hor_offset = %f\n", left_hor_offset);
+    // vprintf("right_hor_offset = %f\n", right_hor_offset);
+    // vprintf("left_ver_offset = %f\n", left_ver_offset);
+    // eprintf("right_ver_offset = %f\n", right_ver_offset);
+
+    for (int i = 0; i < len; ++i) {
+        SpatialPoint lp =
+            to_image_space(left_camera, {lcamps[i], lpts[i].color},
+                           left_scale, hor_offset, ver_offset);
+        int lx = lp.pos.x;
+        int ly = lp.pos.y;
         if (0 <= lx && lx < rectified_left_image.cols && //
             0 <= ly && ly < rectified_left_image.rows) {
             rectified_left_image.at<cv::Vec3b>(ly, lx) =
                 cv::Vec3b(lp.color[0], lp.color[1], lp.color[2]);
         }
-        vec3 rcoord     = to_camera_space(right_camera, rpts[i]).pos * R_rect;
-        SpatialPoint rp = {rcoord, rpts[i].color};
-        rp              = to_image_space(right_camera, rp);
-        int rx          = std::round(rp.pos[0]);
-        int ry          = std::round(rp.pos[1]);
+
+        SpatialPoint rp =
+            to_image_space(right_camera, {rcamps[i], rpts[i].color},
+                           left_scale, hor_offset, ver_offset);
+        int rx = rp.pos.x;
+        int ry = rp.pos.y;
         if (0 <= rx && rx < rectified_right_image.cols && //
             0 <= ry && ry < rectified_right_image.rows) {
             rectified_right_image.at<cv::Vec3b>(ry, rx) =
