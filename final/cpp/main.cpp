@@ -55,7 +55,6 @@ int main(int argc, char **argv) {
     }
     assert(lpts.size() == rpts.size());
     int     len = lpts.size();
-    cv::Mat inter_right(rimg.rows, rimg.cols, rimg.type());
     cv::Mat l_rect(limg.rows, limg.cols, limg.type());
     cv::Mat r_rect(rimg.rows, rimg.cols, rimg.type());
     CamConf repconf = get_reprojection_conf(rconf, lconf);
@@ -64,25 +63,7 @@ int main(int argc, char **argv) {
         vec3 ncoord    = to_camera_space(rconf, rpts[i]).pos * repconf.rot;
         SpatialPoint p = {ncoord, rpts[i].color};
         p              = to_image_space(rconf, p);
-        int x          = std::round(p.pos[0]);
-        int y          = std::round(p.pos[1]);
-        if (0 <= x && x < inter_right.cols && //
-            0 <= y && y < inter_right.rows) {
-            inter_right.at<cv::Vec3b>(y, x) =
-                cv::Vec3b(p.color[0], p.color[1], p.color[2]);
-        } else {
-            vprintf("Out of range\n");
-        }
-    }
-    rpts.clear();
-    for (int y = 0; y < inter_right.rows; ++y) {
-        cv::Vec3b *row = inter_right.ptr<cv::Vec3b>(y);
-        for (int x = 0; x < inter_right.cols; ++x) {
-            rpts.push_back({
-                {x, y, 1},                         // position
-                {row[x][0], row[x][1], row[x][2]}, // color
-            });
-        }
+        rpts[i]        = p;
     }
     /* 2. Rotate both images by R_{rect} */
     vec3 row1 = glm::normalize(repconf.trans);
@@ -124,7 +105,6 @@ int main(int argc, char **argv) {
     }
     /* [/Spatial transformation] */
 
-    cv::imwrite("inter_right.jpg", inter_right);
     cv::imwrite("l_rect.jpg", l_rect);
     cv::imwrite("r_rect.jpg", r_rect);
 
