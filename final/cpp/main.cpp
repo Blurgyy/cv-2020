@@ -34,75 +34,8 @@ int main(int argc, char **argv) {
     /* [/Parse args] */
 
     /* [Spatial transformation] */
-    std::vector<SpatialPoint> lpts, rpts;
-    for (int y = 0; y < limg.rows; ++y) {
-        cv::Vec3b *row = limg.ptr<cv::Vec3b>(y);
-        for (int x = 0; x < limg.cols; ++x) {
-            lpts.push_back({
-                {x, y, 1},                         // position
-                {row[x][0], row[x][1], row[x][2]}, // color
-            });
-        }
-    }
-    for (int y = 0; y < rimg.rows; ++y) {
-        cv::Vec3b *row = rimg.ptr<cv::Vec3b>(y);
-        for (int x = 0; x < rimg.cols; ++x) {
-            rpts.push_back({
-                {x, y, 1},                         // position
-                {row[x][0], row[x][1], row[x][2]}, // color
-            });
-        }
-    }
-    assert(lpts.size() == rpts.size());
-    int     len = lpts.size();
-    cv::Mat l_rect(limg.rows, limg.cols, limg.type());
-    cv::Mat r_rect(rimg.rows, rimg.cols, rimg.type());
-    CamConf repconf = get_reprojection_conf(rconf, lconf);
-    /* 1. Rotate right image to be parallel with left image */
-    for (int i = 0; i < len; ++i) {
-        vec3 ncoord    = to_camera_space(rconf, rpts[i]).pos * repconf.rot;
-        SpatialPoint p = {ncoord, rpts[i].color};
-        p              = to_image_space(rconf, p);
-        rpts[i]        = p;
-    }
-    /* 2. Rotate both images by R_{rect} */
-    vec3 row1 = glm::normalize(repconf.trans);
-    vec3 row2 = vec3{-row1.y, row1.x, 0} / std::sqrt(sq(row1.x) + sq(row1.y));
-    vec3 row3 = glm::cross(row1, row2);
-    // clang-format off
-    mat3 R_rect{
-        row1.x, row1.y, row1.z,
-        row2.x, row2.y, row2.z,
-        row3.x, row3.y, row3.z,
-    };
-    // clang-format on
-    /* 2.1 rotate left image plane */
-    for (int i = 0; i < len; ++i) {
-        vec3         lcoord = to_camera_space(lconf, lpts[i]).pos * R_rect;
-        SpatialPoint lp     = {lcoord, lpts[i].color};
-        lp                  = to_image_space(lconf, lp);
-        int lx              = std::round(lp.pos[0]);
-        int ly              = std::round(lp.pos[1]);
-        if (0 <= lx && lx < l_rect.cols && //
-            0 <= ly && ly < l_rect.rows) {
-            l_rect.at<cv::Vec3b>(ly, lx) =
-                cv::Vec3b(lp.color[0], lp.color[1], lp.color[2]);
-        } else {
-            vprintf("Out of range\n");
-        }
-        vec3         rcoord = to_camera_space(rconf, rpts[i]).pos * R_rect;
-        SpatialPoint rp     = {rcoord, rpts[i].color};
-        rp                  = to_image_space(rconf, rp);
-        int rx              = std::round(rp.pos[0]);
-        int ry              = std::round(rp.pos[1]);
-        if (0 <= rx && rx < r_rect.cols && //
-            0 <= ry && ry < r_rect.rows) {
-            r_rect.at<cv::Vec3b>(ry, rx) =
-                cv::Vec3b(rp.color[0], rp.color[1], rp.color[2]);
-        } else {
-            vprintf("Out of range\n");
-        }
-    }
+    cv::Mat l_rect, r_rect;
+    stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
     /* [/Spatial transformation] */
 
     cv::imwrite("l_rect.jpg", l_rect);
