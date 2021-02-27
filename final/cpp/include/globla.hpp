@@ -135,8 +135,8 @@ inline SpatialPoint to_image_space(CamConf const &     conf,
                                    SpatialPoint const &point) {
     SpatialPoint ret;
     ret.pos = {
-        (point.pos.x * conf.fx + conf.cx) / point.pos.z,
-        (point.pos.y * conf.fy + conf.cy) / point.pos.z,
+        point.pos.x * conf.fx / point.pos.z + conf.cx,
+        point.pos.y * conf.fy / point.pos.z + conf.cy,
         1,
     };
     ret.color = point.color;

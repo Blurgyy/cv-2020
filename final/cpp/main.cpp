@@ -35,21 +35,21 @@ int main(int argc, char **argv) {
 
     /* [Spatial transformation] */
     std::vector<SpatialPoint> lpts, rpts;
-    for (int x = 0; x < limg.cols; ++x) {
-        cv::Vec3b *row = limg.ptr<cv::Vec3b>(x);
-        for (int y = 0; y < limg.rows; ++y) {
+    for (int y = 0; y < limg.rows; ++y) {
+        cv::Vec3b *row = limg.ptr<cv::Vec3b>(y);
+        for (int x = 0; x < limg.cols; ++x) {
             lpts.push_back({
                 {x, y, 1},                         // position
-                {row[y][0], row[y][1], row[y][2]}, // color
+                {row[x][0], row[x][1], row[x][2]}, // color
             });
         }
     }
-    for (int x = 0; x < rimg.cols; ++x) {
-        cv::Vec3b *row = rimg.ptr<cv::Vec3b>(x);
-        for (int y = 0; y < rimg.rows; ++y) {
+    for (int y = 0; y < rimg.rows; ++y) {
+        cv::Vec3b *row = rimg.ptr<cv::Vec3b>(y);
+        for (int x = 0; x < rimg.cols; ++x) {
             rpts.push_back({
                 {x, y, 1},                         // position
-                {row[y][0], row[y][1], row[y][2]}, // color
+                {row[x][0], row[x][1], row[x][2]}, // color
             });
         }
     }
@@ -57,24 +57,15 @@ int main(int argc, char **argv) {
     int     len = lpts.size();
     cv::Mat out(rimg.rows, rimg.cols, rimg.type());
     for (int i = 0; i < len; ++i) {
-        // SpatialPoint p = reproject(lconf, rconf, rpts[i]);
-        // SpatialPoint p =
-        // reproject(get_reprojection_conf(rconf, lconf), rpts[i]);
         CamConf repconf = get_reprojection_conf(rconf, lconf);
         vec3    ncoord  = to_camera_space(rconf, rpts[i]).pos * repconf.rot;
-        // dump(rpts[i]);
-        // dump(ncoord);
-        SpatialPoint p = {ncoord, rpts[i].color};
-        p              = to_image_space(rconf, p);
-        // printf("Before reprojection:\n");
-        // dump(rpts[i]);
-        // printf("After reprojection:\n");
-        // dump(p);
-        // printf("\n");
-        int x = std::round(p.pos[0]);
-        int y = std::round(p.pos[1]);
-        if (0 <= x && x < rimg.cols && 0 <= y && y < rimg.rows) {
-            out.at<cv::Vec3b>(x, y) =
+        SpatialPoint p  = {ncoord, rpts[i].color};
+        p               = to_image_space(rconf, p);
+        int x           = std::round(p.pos[0]);
+        int y           = std::round(p.pos[1]);
+        if (0 <= x && x < out.cols && //
+            0 <= y && y < out.rows) {
+            out.at<cv::Vec3b>(y, x) =
                 cv::Vec3b(p.color[0], p.color[1], p.color[2]);
         } else {
             vprintf("Out of range\n");
