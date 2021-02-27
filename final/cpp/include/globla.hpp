@@ -81,6 +81,8 @@ inline std::pair<CamConf, CamConf> read_cam(std::string const &filename) {
     if (from.fail()) {
         eprintf("Failed opening file %s\n", filename.c_str());
     }
+    /* Check if reading is successful */
+    int six = 0;
     for (std::string line; std::getline(from, line);) {
         std::istringstream in{line};
         std::string        token;
@@ -89,33 +91,44 @@ inline std::pair<CamConf, CamConf> read_cam(std::string const &filename) {
             flt fx;
             in >> fx;
             lret.fx = rret.fx = fx;
+            ++six;
         } else if (token == "cx") {
             flt cx;
             in >> cx;
             lret.cx = rret.cx = cx;
+            ++six;
         } else if (token == "cy") {
             flt cy;
             in >> cy;
             lret.cy = rret.cy = cy;
+            ++six;
         } else if (token == "fy") {
             flt fy;
             in >> fy;
             lret.fy = rret.fy = fy;
-        } else if (token == "left") {
+            ++six;
+        } else if (token == "left" || token == "Left") {
             for (int i = 0; i < 3; ++i) {
                 std::getline(from, line);
                 in = std::istringstream{line};
                 in >> lret.rot[i][0] >> lret.rot[i][1] >> lret.rot[i][2] >>
                     lret.trans[i];
             }
-        } else if (token == "right") {
+            ++six;
+        } else if (token == "right" || token == "Right") {
             for (int i = 0; i < 3; ++i) {
                 std::getline(from, line);
                 in = std::istringstream{line};
                 in >> rret.rot[i][0] >> rret.rot[i][1] >> rret.rot[i][2] >>
                     rret.trans[i];
             }
+            ++six;
         }
+    }
+    if (six != 6) {
+        dump(lret);
+        dump(rret);
+        eprintf("Failed reading camera configs\n");
     }
     return std::make_pair(lret, rret);
 }
