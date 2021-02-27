@@ -1,0 +1,7 @@
+*.txt text
+*.cpp text diff=cpp
+*.hpp text diff=cpp
+*.py  text diff=python
+
+# Author: Blurgy <gy@blurgy.xyz>
+# Date:   Feb 27 2021, 14:38 [CST]
