@@ -54,19 +54,29 @@ int main(int argc, char **argv) {
         }
     }
     assert(lpts.size() == rpts.size());
-    int len = lpts.size();
+    int     len = lpts.size();
+    cv::Mat out(rimg.rows, rimg.cols, rimg.type());
     for (int i = 0; i < len; ++i) {
-        SpatialPoint p = to_left_camera(lconf, rconf, rpts[i]);
-        int          x = p.pos[0];
-        int          y = p.pos[1];
+        // SpatialPoint p = reproject(lconf, rconf, rpts[i]);
+        SpatialPoint p =
+            reproject(get_reprojection_conf(rconf, lconf), rpts[i]);
+        // printf("Before reprojection:\n");
+        // dump(rpts[i]);
+        // printf("After reprojection:\n");
+        // dump(p);
+        // printf("\n");
+        int x = p.pos[0];
+        int y = p.pos[1];
         if (0 <= x && x < rimg.cols && 0 <= y && y < rimg.rows) {
-            rimg.at<cv::Vec3b>(x, y) =
+            out.at<cv::Vec3b>(x, y) =
                 cv::Vec3b(p.color[0], p.color[1], p.color[2]);
+        } else {
+            vprintf("Out of range\n");
         }
     }
     /* [/Spatial transformation] */
 
-    cv::imwrite("rimg.jpg", rimg);
+    cv::imwrite("rimg.jpg", out);
 
     return 0;
 }

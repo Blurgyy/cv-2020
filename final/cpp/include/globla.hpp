@@ -36,7 +36,7 @@ using mat3 = glm::mat<3, 3, flt, glm::defaultp>;
     } while (0)
 #define vprintf(fmt, ...)                                                    \
     do {                                                                     \
-        fprintf(stdout, " [v] " fmt, ##__VA_ARGS__);                         \
+        fprintf(stderr, " [v] " fmt, ##__VA_ARGS__);                         \
     } while (0)
 
 /* Structs */
@@ -50,6 +50,26 @@ struct SpatialPoint {
     vec3 pos;
     vec3 color;
 };
+
+/* Struct helper functions */
+inline void dump(CamConf const &x) {
+    printf("fx = %f, fy = %f\n", x.fx, x.fy);
+    printf("cx = %f, cy = %f\n", x.cx, x.cy);
+    printf("rotation:\n");
+    for (int i = 0; i < 3; ++i) {
+        printf("%f", x.rot[i][0]);
+        for (int j = 1; j < 3; ++j) {
+            printf(" %f", x.rot[i][j]);
+        }
+        printf("\n");
+    }
+    printf("translation:\n");
+    printf("%f %f %f\n", x.trans[0], x.trans[1], x.trans[2]);
+}
+inline void dump(SpatialPoint const &x) {
+    printf("position: %f %f %f\n", x.pos[0], x.pos[1], x.pos[2]);
+    printf("color:    %f %f %f\n", x.color[0], x.color[1], x.color[2]);
+}
 
 /* Functions */
 template <typename T> T sq(T const &x) { return x * x; }
@@ -82,11 +102,15 @@ inline std::pair<CamConf, CamConf> read_cam(std::string const &filename) {
             lret.fy = rret.fy = fy;
         } else if (token == "left") {
             for (int i = 0; i < 3; ++i) {
+                std::getline(from, line);
+                in = std::istringstream{line};
                 in >> lret.rot[i][0] >> lret.rot[i][1] >> lret.rot[i][2] >>
                     lret.trans[i];
             }
         } else if (token == "right") {
             for (int i = 0; i < 3; ++i) {
+                std::getline(from, line);
+                in = std::istringstream{line};
                 in >> rret.rot[i][0] >> rret.rot[i][1] >> rret.rot[i][2] >>
                     rret.trans[i];
             }
@@ -107,11 +131,25 @@ inline SpatialPoint to_camera_space(CamConf const &     conf,
     return ret;
 }
 
-inline SpatialPoint to_left_camera(CamConf const &lconf, CamConf const &rconf,
-                                   SpatialPoint const &rpoint) {
-    vec3 pos =
-        (rpoint.pos - rconf.trans) * glm::transpose(rconf.rot) * lconf.rot +
-        lconf.trans;
+/* Get the reprojection matrix from camera `from` to camera `to`.
+ */
+inline CamConf get_reprojection_conf(CamConf const &from, CamConf const &to) {
+    // dump(from);
+    // dump(to);
+    // eprintf();
+    CamConf ret;
+    ret.rot   = glm::transpose(from.rot) * to.rot;
+    ret.trans = to.trans - from.trans * glm::transpose(from.rot) * to.rot;
+    return ret;
+}
+
+/* Reproject a point with given camera configuration.
+ * Note: Get reprojection conf with function `get_reprojection_conf`.
+ */
+inline SpatialPoint reproject(CamConf const &     conf,
+                              SpatialPoint const &rpoint) {
+    vec3 pos = rpoint.pos * conf.rot + conf.trans;
+    // printf("new pos: %f %f %f\n", pos.x, pos.y, pos.z);
     pos.x /= pos.z;
     pos.y /= pos.z;
     return SpatialPoint{pos, rpoint.color};
