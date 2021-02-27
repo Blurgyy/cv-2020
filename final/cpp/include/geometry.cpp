@@ -110,16 +110,16 @@ void stereo_rectification(cv::Mat const &left_image,
             to_image_space(left_camera, {lcamps[i], lpts[i].color});
         lmaxx = std::max(lmaxx, lp.pos.x);
         lminx = std::min(lminx, lp.pos.x);
-        lmaxy = std::max(lmaxy, lp.pos.x);
-        lminy = std::min(lminy, lp.pos.x);
+        lmaxy = std::max(lmaxy, lp.pos.y);
+        lminy = std::min(lminy, lp.pos.y);
 
         rcamps.push_back(to_camera_space(right_camera, rpts[i]).pos * R_rect);
         SpatialPoint rp =
             to_image_space(right_camera, {rcamps[i], rpts[i].color});
         rmaxx = std::max(rmaxx, rp.pos.x);
         rminx = std::min(rminx, rp.pos.x);
-        rmaxy = std::max(rmaxy, rp.pos.x);
-        rminy = std::min(rminy, rp.pos.x);
+        rmaxy = std::max(rmaxy, rp.pos.y);
+        rminy = std::min(rminy, rp.pos.y);
     }
 
     flt lmidx = (lminx + lmaxx) / 2;
@@ -138,9 +138,13 @@ void stereo_rectification(cv::Mat const &left_image,
     flt right_hor_offset = static_cast<flt>(right_image.cols) / 2 - rmidx;
     flt right_ver_offset = static_cast<flt>(right_image.rows) / 2 - rmidy;
 
-    flt scale      = (left_scale + right_scale) / 2;
+    flt scale      = std::min(left_scale, right_scale);
     flt hor_offset = (left_hor_offset + right_hor_offset) / 2;
     flt ver_offset = (left_ver_offset + right_ver_offset) / 2;
+
+    vprintf("scale is %f\n", scale);
+    vprintf("hor_offset is %f\n", hor_offset);
+    vprintf("ver_offset is %f\n", ver_offset);
 
     // vprintf("left_scale is %f\n", left_scale);
     // vprintf("right_scale is %f\n", right_scale);
@@ -151,8 +155,8 @@ void stereo_rectification(cv::Mat const &left_image,
 
     for (int i = 0; i < len; ++i) {
         SpatialPoint lp =
-            to_image_space(left_camera, {lcamps[i], lpts[i].color},
-                           left_scale, hor_offset, ver_offset);
+            to_image_space(left_camera, {lcamps[i], lpts[i].color}, scale,
+                           hor_offset, ver_offset);
         int lx = lp.pos.x;
         int ly = lp.pos.y;
         if (0 <= lx && lx < rectified_left_image.cols && //
@@ -162,8 +166,8 @@ void stereo_rectification(cv::Mat const &left_image,
         }
 
         SpatialPoint rp =
-            to_image_space(right_camera, {rcamps[i], rpts[i].color},
-                           left_scale, hor_offset, ver_offset);
+            to_image_space(right_camera, {rcamps[i], rpts[i].color}, scale,
+                           hor_offset, ver_offset);
         int rx = rp.pos.x;
         int ry = rp.pos.y;
         if (0 <= rx && rx < rectified_right_image.cols && //
