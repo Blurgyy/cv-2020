@@ -70,6 +70,7 @@ inline void dump(SpatialPoint const &x) {
     printf("position: %f %f %f\n", x.pos[0], x.pos[1], x.pos[2]);
     printf("color:    %f %f %f\n", x.color[0], x.color[1], x.color[2]);
 }
+inline void dump(vec3 const &x) { printf("%f %f %f\n", x.x, x.y, x.z); }
 
 /* Functions */
 template <typename T> T sq(T const &x) { return x * x; }
@@ -125,6 +126,17 @@ inline SpatialPoint to_camera_space(CamConf const &     conf,
     ret.pos = vec3{
         (point.pos.x - conf.cx) / conf.fx,
         (point.pos.y - conf.cy) / conf.fy,
+        1,
+    };
+    ret.color = point.color;
+    return ret;
+}
+inline SpatialPoint to_image_space(CamConf const &     conf,
+                                   SpatialPoint const &point) {
+    SpatialPoint ret;
+    ret.pos = {
+        (point.pos.x * conf.fx + conf.cx) / point.pos.z,
+        (point.pos.y * conf.fy + conf.cy) / point.pos.z,
         1,
     };
     ret.color = point.color;
