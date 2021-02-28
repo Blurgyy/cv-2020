@@ -32,14 +32,6 @@ CamConf get_reprojection_conf(CamConf const &from, CamConf const &to) {
     return ret;
 }
 
-SpatialPoint reproject(CamConf const &conf, SpatialPoint const &rpoint) {
-    vec3 pos = rpoint.pos * conf.rot + conf.trans;
-    // printf("new pos: %f %f %f\n", pos.x, pos.y, pos.z);
-    pos.x /= pos.z;
-    pos.y /= pos.z;
-    return SpatialPoint{pos, rpoint.color};
-}
-
 void stereo_rectification(cv::Mat const &left_image,
                           cv::Mat const &right_image,
                           CamConf const &left_camera,

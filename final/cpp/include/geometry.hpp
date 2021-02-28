@@ -9,11 +9,6 @@ SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point);
  */
 CamConf get_reprojection_conf(CamConf const &from, CamConf const &to);
 
-/* Reproject a point with given camera configuration.
- * Note: Get reprojection conf with function `get_reprojection_conf`.
- */
-SpatialPoint reproject(CamConf const &conf, SpatialPoint const &rpoint);
-
 /* Stereo rectification */
 void stereo_rectification(cv::Mat const &left_image,
                           cv::Mat const &right_image,
