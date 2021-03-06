@@ -34,8 +34,9 @@ int main(int argc, char **argv) {
     /* [/Parse args] */
 
     /* [Stereo rectification] */
-    cv::Mat l_rect, r_rect;
-    stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
+    cv::Mat          l_rect, r_rect;
+    std::vector<ppp> pixel_map =
+        stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
     /* [/Stereo rectification] */
 
     cv::imwrite("l_rect.jpg", l_rect);

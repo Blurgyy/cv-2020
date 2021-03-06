@@ -53,6 +53,7 @@ struct SpatialPoint {
     vec3 pos;
     vec3 color;
 };
+using ppp = std::pair<SpatialPoint, SpatialPoint>;
 
 /* Struct helper functions */
 inline void dump(CamConf const &x) {
