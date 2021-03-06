@@ -28,11 +28,9 @@ int main(int argc, char **argv) {
         Usage();
         return 1;
     }
-    limg          = cv::imread(argv[1], cv::IMREAD_COLOR);
-    rimg          = cv::imread(argv[2], cv::IMREAD_COLOR);
-    auto    confs = read_cam(argv[3]);
-    CamConf lconf = confs.first;
-    CamConf rconf = confs.second;
+    limg                = cv::imread(argv[1], cv::IMREAD_COLOR);
+    rimg                = cv::imread(argv[2], cv::IMREAD_COLOR);
+    auto [lconf, rconf] = read_cam(argv[3]);
     /* [/Parse args] */
 
     /* [Stereo rectification] */

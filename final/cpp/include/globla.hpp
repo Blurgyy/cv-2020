@@ -11,6 +11,7 @@ using mat3 = glm::mat<3, 3, flt, glm::defaultp>;
 
 #include <fstream>
 #include <sstream>
+#include <tuple>
 
 #include <opencv2/opencv.hpp>
 
@@ -77,7 +78,7 @@ inline void dump(vec3 const &x) { printf("%f %f %f\n", x.x, x.y, x.z); }
 /* Functions */
 template <typename T> T sq(T const &x) { return x * x; }
 
-inline std::pair<CamConf, CamConf> read_cam(std::string const &filename) {
+inline std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
     CamConf       lret, rret;
     std::ifstream from{filename};
     if (from.fail()) {
@@ -132,7 +133,7 @@ inline std::pair<CamConf, CamConf> read_cam(std::string const &filename) {
         dump(rret);
         eprintf("Failed reading camera configs\n");
     }
-    return std::make_pair(lret, rret);
+    return {lret, rret};
 }
 
 // Author: Blurgy <gy@blurgy.xyz>
