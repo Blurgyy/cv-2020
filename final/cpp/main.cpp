@@ -35,9 +35,16 @@ int main(int argc, char **argv) {
 
     /* [Stereo rectification] */
     cv::Mat          l_rect, r_rect;
-    std::vector<ppp> pixel_map =
-        stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
+    flt              scale     = std::numeric_limits<flt>::lowest();
+    flt              baseline  = std::numeric_limits<flt>::lowest();
+    std::vector<ppp> pixel_map = stereo_rectification(
+        limg, rimg, lconf, rconf, l_rect, r_rect, baseline, scale);
     /* [/Stereo rectification] */
+
+    /* [SAD] */
+    cv::Mat dep_SAD = SAD(l_rect, r_rect, 2, lconf.fx * scale, baseline);
+    cv::imwrite("dep_SAD.jpg", dep_SAD);
+    /* [/SAD] */
 
     cv::imwrite("l_rect.jpg", l_rect);
     cv::imwrite("r_rect.jpg", r_rect);

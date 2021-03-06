@@ -18,7 +18,8 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
                                       CamConf const &left_camera,
                                       CamConf const &right_camera,
                                       cv::Mat &      rectified_left_image,
-                                      cv::Mat &      rectified_right_image);
+                                      cv::Mat &      rectified_right_image,
+                                      flt &baseline, flt &scale);
 
 // Author: Blurgy <gy@blurgy.xyz>
 // Date:   Feb 27 2021, 16:19 [CST]

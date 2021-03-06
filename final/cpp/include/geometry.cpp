@@ -39,7 +39,8 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
                                       CamConf const &left_camera,
                                       CamConf const &right_camera,
                                       cv::Mat &      rectified_left_image,
-                                      cv::Mat &      rectified_right_image) {
+                                      cv::Mat &      rectified_right_image,
+                                      flt &baseline, flt &scale) {
     std::vector<SpatialPoint> lpts, rpts;
     std::vector<ppp>          ret;
     /* Generate points on both images' imaging planes */
@@ -69,6 +70,9 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     rectified_right_image =
         cv::Mat(right_image.rows, right_image.cols, right_image.type());
     CamConf repconf = get_reprojection_conf(right_camera, left_camera);
+
+    /* Output baseline length */
+    baseline = glm::length(repconf.trans);
 
     /* 1. Rotate right image to let it be parallel with left image */
     for (int i = 0; i < len; ++i) {
@@ -135,7 +139,7 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     flt right_hor_offset = static_cast<flt>(right_image.cols) / 2 - rmidx;
     flt right_ver_offset = static_cast<flt>(right_image.rows) / 2 - rmidy;
 
-    flt scale      = std::min(left_scale, right_scale);
+    scale          = std::min(left_scale, right_scale);
     flt hor_offset = (left_hor_offset + right_hor_offset) / 2;
     flt ver_offset = (left_ver_offset + right_ver_offset) / 2;
 
