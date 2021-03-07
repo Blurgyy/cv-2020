@@ -1,3 +1,4 @@
+#include "estimating.hpp"
 #include "geometry.hpp"
 
 SpatialPoint to_camera_space(CamConf const &conf, SpatialPoint const &point) {
@@ -60,8 +61,27 @@ stereo_rectification(cv::Mat const &left_image, cv::Mat const &right_image,
     }
     assert(lpts.size() == rpts.size());
 
-    int     len     = lpts.size();
-    CamConf repconf = get_reprojection_conf(right_camera, left_camera);
+    int len = lpts.size();
+    // clang-format off
+    // 1   │ cam0=[2945.377 0 1284.862; 0 2945.377 954.52; 0 0 1]
+    // 2   │ cam1=[2945.377 0 1455.543; 0 2945.377 954.52; 0 0 1]
+    mat3 K{
+        left_camera.fx, 0, left_camera.cx,
+        0, left_camera.fy, left_camera.cy,
+        0,              0,              1,
+    };
+    // clang-format on
+    mat3                      R;
+    vec3                      t;
+    std::vector<cv::KeyPoint> kp1, kp2;
+    std::vector<cv::DMatch>   matches;
+    get_matches(left_image, right_image, kp1, kp2, matches);
+    pose_estimation(kp1, kp2, matches, K, R, t);
+    CamConf repconf;
+    repconf.rot   = R;
+    repconf.trans = t;
+    // CamConf repconf = get_reprojection_conf(right_camera, left_camera);
+    printf("repconf\n");
     dump(repconf);
 
     /* Output baseline length */
