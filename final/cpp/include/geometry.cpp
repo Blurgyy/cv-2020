@@ -11,13 +11,11 @@ SpatialPoint to_camera_space(CamConf const &conf, SpatialPoint const &point) {
     return ret;
 }
 
-SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point,
-                            flt const &scale, flt const &hor_offset,
-                            flt const &ver_offset) {
+SpatialPoint to_image_space(CamConf const &conf, SpatialPoint const &point) {
     SpatialPoint ret;
     ret.pos = {
-        point.pos.x * conf.fx * scale / point.pos.z + conf.cx + hor_offset,
-        point.pos.y * conf.fy * scale / point.pos.z + conf.cy + ver_offset,
+        point.pos.x * conf.fx / point.pos.z + conf.cx,
+        point.pos.y * conf.fy / point.pos.z + conf.cy,
         1,
     };
     ret.color = point.color;
@@ -34,13 +32,11 @@ CamConf get_reprojection_conf(CamConf const &from, CamConf const &to) {
     return ret;
 }
 
-std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
-                                      cv::Mat const &right_image,
-                                      CamConf const &left_camera,
-                                      CamConf const &right_camera,
-                                      cv::Mat &      rectified_left_image,
-                                      cv::Mat &      rectified_right_image,
-                                      flt &baseline, flt &scale) {
+std::vector<ppp>
+stereo_rectification(cv::Mat const &left_image, cv::Mat const &right_image,
+                     CamConf const &left_camera, CamConf const &right_camera,
+                     cv::Mat &rectified_left_image,
+                     cv::Mat &rectified_right_image, flt &baseline) {
     std::vector<SpatialPoint> lpts, rpts;
     std::vector<ppp>          ret;
     /* Generate points on both images' imaging planes */
@@ -64,11 +60,7 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     }
     assert(lpts.size() == rpts.size());
 
-    int len = lpts.size();
-    rectified_left_image =
-        cv::Mat(left_image.rows, left_image.cols, left_image.type());
-    rectified_right_image =
-        cv::Mat(right_image.rows, right_image.cols, right_image.type());
+    int     len     = lpts.size();
     CamConf repconf = get_reprojection_conf(right_camera, left_camera);
 
     /* Output baseline length */
@@ -95,69 +87,40 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     };
     // clang-format on
     /* 2.1 rotate left image plane */
-    flt lmaxx = std::numeric_limits<flt>::lowest();
-    flt rmaxx = std::numeric_limits<flt>::lowest();
-    flt lmaxy = std::numeric_limits<flt>::lowest();
-    flt rmaxy = std::numeric_limits<flt>::lowest();
-    flt lminx = std::numeric_limits<flt>::max();
-    flt rminx = std::numeric_limits<flt>::max();
-    flt lminy = std::numeric_limits<flt>::max();
-    flt rminy = std::numeric_limits<flt>::max();
+    flt maxx = std::numeric_limits<flt>::lowest();
+    flt maxy = std::numeric_limits<flt>::lowest();
+    flt minx = std::numeric_limits<flt>::max();
+    flt miny = std::numeric_limits<flt>::max();
 
-    std::vector<vec3> lcamps, rcamps;
+    std::vector<SpatialPoint> limgpts, rimgpts;
     for (int i = 0; i < len; ++i) {
-        lcamps.push_back(to_camera_space(left_camera, lpts[i]).pos * R_rect);
+        vec3 lcampt = to_camera_space(left_camera, lpts[i]).pos * R_rect;
         SpatialPoint lp =
-            to_image_space(left_camera, {lcamps[i], lpts[i].color});
-        lmaxx = std::max(lmaxx, lp.pos.x);
-        lminx = std::min(lminx, lp.pos.x);
-        lmaxy = std::max(lmaxy, lp.pos.y);
-        lminy = std::min(lminy, lp.pos.y);
+            to_image_space(left_camera, {lcampt, lpts[i].color});
+        limgpts.push_back(lp);
+        maxx = std::max(maxx, lp.pos.x);
+        minx = std::min(minx, lp.pos.x);
+        maxy = std::max(maxy, lp.pos.y);
+        miny = std::min(miny, lp.pos.y);
 
-        rcamps.push_back(to_camera_space(right_camera, rpts[i]).pos * R_rect);
+        vec3 rcampt = (to_camera_space(right_camera, rpts[i]).pos * R_rect);
         SpatialPoint rp =
-            to_image_space(right_camera, {rcamps[i], rpts[i].color});
-        rmaxx = std::max(rmaxx, rp.pos.x);
-        rminx = std::min(rminx, rp.pos.x);
-        rmaxy = std::max(rmaxy, rp.pos.y);
-        rminy = std::min(rminy, rp.pos.y);
+            to_image_space(right_camera, {rcampt, rpts[i].color});
+        rimgpts.push_back(rp);
+        maxx = std::max(maxx, rp.pos.x);
+        minx = std::min(minx, rp.pos.x);
+        maxy = std::max(maxy, rp.pos.y);
+        miny = std::min(miny, rp.pos.y);
     }
 
-    flt lmidx = (lminx + lmaxx) / 2;
-    flt rmidx = (rminx + rmaxx) / 2;
-    flt lmidy = (lminy + lmaxy) / 2;
-    flt rmidy = (rminy + rmaxy) / 2;
-
-    flt left_scale =
-        std::min(static_cast<flt>(left_image.cols) / (lmaxx - lminx),
-                 static_cast<flt>(left_image.rows) / (lmaxy - lminy));
-    flt right_scale =
-        std::min(static_cast<flt>(right_image.cols) / (rmaxx - rminx),
-                 static_cast<flt>(right_image.rows) / (rmaxy - rminy));
-    flt left_hor_offset  = static_cast<flt>(left_image.cols) / 2 - lmidx;
-    flt left_ver_offset  = static_cast<flt>(left_image.rows) / 2 - lmidy;
-    flt right_hor_offset = static_cast<flt>(right_image.cols) / 2 - rmidx;
-    flt right_ver_offset = static_cast<flt>(right_image.rows) / 2 - rmidy;
-
-    scale          = std::min(left_scale, right_scale);
-    flt hor_offset = (left_hor_offset + right_hor_offset) / 2;
-    flt ver_offset = (left_ver_offset + right_ver_offset) / 2;
-
-    vprintf("scale is %f\n", scale);
-    vprintf("hor_offset is %f\n", hor_offset);
-    vprintf("ver_offset is %f\n", ver_offset);
-
-    // vprintf("left_scale is %f\n", left_scale);
-    // vprintf("right_scale is %f\n", right_scale);
-    // vprintf("left_hor_offset = %f\n", left_hor_offset);
-    // vprintf("right_hor_offset = %f\n", right_hor_offset);
-    // vprintf("left_ver_offset = %f\n", left_ver_offset);
-    // eprintf("right_ver_offset = %f\n", right_ver_offset);
+    int cols              = std::round(maxx) - std::round(minx) + 1;
+    int rows              = std::round(maxy) - std::round(miny) + 1;
+    rectified_left_image  = cv::Mat(rows, cols, left_image.type());
+    rectified_right_image = cv::Mat(rows, cols, right_image.type());
 
     for (int i = 0; i < len; ++i) {
-        SpatialPoint lp =
-            to_image_space(left_camera, {lcamps[i], lpts[i].color}, scale,
-                           hor_offset, ver_offset);
+        SpatialPoint lp = limgpts[i];
+        lp.pos -= vec3(minx, miny, 0);
         ret.push_back(std::make_pair(lpts[i], lp));
         int lx = lp.pos.x;
         int ly = lp.pos.y;
@@ -167,9 +130,8 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
                 cv::Vec3b(lp.color[0], lp.color[1], lp.color[2]);
         }
 
-        SpatialPoint rp =
-            to_image_space(right_camera, {rcamps[i], rpts[i].color}, scale,
-                           hor_offset, ver_offset);
+        SpatialPoint rp = rimgpts[i];
+        rp.pos -= vec3(minx, miny, 0);
         int rx = rp.pos.x;
         int ry = rp.pos.y;
         if (0 <= rx && rx < rectified_right_image.cols && //

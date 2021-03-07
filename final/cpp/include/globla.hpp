@@ -135,11 +135,11 @@ inline std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
     return {lret, rret};
 }
 
-inline cv::Mat map_back(std::vector<ppp> const &pixel_map,
-                        cv::Mat const &         dep) {
-    int     rows = dep.rows;
-    int     cols = dep.cols;
-    cv::Mat ret  = cv::Mat(rows, cols, CV_32FC1, -1);
+inline cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
+                        int const &cols, cv::Mat const &dep) {
+    int     drows = dep.rows;
+    int     dcols = dep.cols;
+    cv::Mat ret   = cv::Mat(rows, cols, CV_32FC1, -1);
 
     flt mind = std::numeric_limits<flt>::max();
     flt maxd = std::numeric_limits<flt>::lowest();
@@ -147,8 +147,8 @@ inline cv::Mat map_back(std::vector<ppp> const &pixel_map,
         SpatialPoint dep_p = item.second;
         int          dep_x = dep_p.pos.x;
         int          dep_y = dep_p.pos.y;
-        if (0 <= dep_x && dep_x < cols && //
-            0 <= dep_y && dep_y < rows) {
+        if (0 <= dep_x && dep_x < dcols && //
+            0 <= dep_y && dep_y < drows) {
             SpatialPoint ori_p          = item.first;
             int          ori_x          = ori_p.pos.x;
             int          ori_y          = ori_p.pos.y;
