@@ -1,5 +1,9 @@
 #include "matching.hpp"
 
+#include <cmath>
+
+#include <omp.h>
+
 cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             flt const &fx, flt const &baseline) {
     if (limg.rows != rimg.rows || //
@@ -14,17 +18,19 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
     flt mind = std::numeric_limits<flt>::max();
 
     /* For every pixel on the left image .. */
+#pragma omp parallel for
     for (int y = wr; y < rows - wr; ++y) {
         for (int x = wr; x < cols - wr; ++x) {
             /* Find the corresponding window that has minimal difference with
              * it on the right image.
              */
             uint32_t min_diff = std::numeric_limits<uint32_t>::max();
-            uint32_t cur_diff = std::numeric_limits<uint32_t>::max();
             int      pos      = -1;
             /* Iterate through the same row */
             for (int rx = wr; rx < cols - wr; ++rx) {
+                uint32_t cur_diff = std::numeric_limits<uint32_t>::max();
                 for (int i = -wr; i < wr; ++i) {
+                    // cv::Vec3b lcol = limg.at<cv::Vec3b>(y, x);
                     for (int j = -wr; j < wr; ++j) {
                         cv::Vec3b lcol = limg.at<cv::Vec3b>(y + j, x + i);
                         cv::Vec3b rcol = rimg.at<cv::Vec3b>(y + j, rx + i);
@@ -44,6 +50,7 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             if (pos == x) {
                 continue;
             }
+            // vprintf("disparity = %d\n", std::abs(pos - x));
             flt d                 = fx * baseline / std::abs(pos - x);
             depth.at<float>(y, x) = d;
             maxd                  = std::max(maxd, d);
@@ -52,18 +59,6 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
     }
 
     vprintf("maxd is %f, mind is %f\n", maxd, mind);
-
-    /* [Normalize] */
-    for (int y = wr; y < rows - wr; ++y) {
-        for (int x = wr; x < cols - wr; ++x) {
-            float &value = depth.at<float>(y, x);
-            if (value < 0) {
-                continue;
-            }
-            value = (value - mind) / (maxd - mind) * 255.5 + 0.5;
-        }
-    }
-    /* [/Normalize] */
 
     return depth;
 }

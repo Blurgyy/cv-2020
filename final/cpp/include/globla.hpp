@@ -2,9 +2,6 @@
 
 using flt = double;
 
-#include <boost/format.hpp>
-using format = boost::format;
-
 #include <glm/glm.hpp>
 using vec3 = glm::vec<3, flt, glm::defaultp>;
 using mat3 = glm::mat<3, 3, flt, glm::defaultp>;
@@ -12,6 +9,7 @@ using mat3 = glm::mat<3, 3, flt, glm::defaultp>;
 #include <fstream>
 #include <sstream>
 #include <tuple>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
 
@@ -135,6 +133,48 @@ inline std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
         eprintf("Failed reading camera configs\n");
     }
     return {lret, rret};
+}
+
+inline cv::Mat map_back(std::vector<ppp> const &pixel_map,
+                        cv::Mat const &         dep) {
+    int     rows = dep.rows;
+    int     cols = dep.cols;
+    cv::Mat ret  = cv::Mat(rows, cols, CV_32FC1, -1);
+
+    flt mind = std::numeric_limits<flt>::max();
+    flt maxd = std::numeric_limits<flt>::lowest();
+    for (ppp const &item : pixel_map) {
+        SpatialPoint dep_p = item.second;
+        int          dep_x = dep_p.pos.x;
+        int          dep_y = dep_p.pos.y;
+        if (0 <= dep_x && dep_x < cols && //
+            0 <= dep_y && dep_y < rows) {
+            SpatialPoint ori_p          = item.first;
+            int          ori_x          = ori_p.pos.x;
+            int          ori_y          = ori_p.pos.y;
+            flt          depth          = dep.at<float>(dep_y, dep_x);
+            ret.at<float>(ori_y, ori_x) = depth;
+
+            mind = std::min(mind, depth);
+            maxd = std::max(maxd, depth);
+        }
+    }
+
+    /* [Normalize] */
+    for (int y = 0; y < rows; ++y) {
+        for (int x = 0; x < cols; ++x) {
+            float &value = ret.at<float>(y, x);
+            if (value < 0) {
+                continue;
+            }
+            value = (value - mind) / (maxd - mind);
+            value = std::pow(value, 0.4);
+            value = value * 256 - 0.5;
+        }
+    }
+    /* [/Normalize] */
+
+    return ret;
 }
 
 // Author: Blurgy <gy@blurgy.xyz>

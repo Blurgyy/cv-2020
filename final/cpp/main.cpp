@@ -42,7 +42,8 @@ int main(int argc, char **argv) {
     /* [/Stereo rectification] */
 
     /* [SAD] */
-    cv::Mat dep_SAD = SAD(l_rect, r_rect, 2, lconf.fx * scale, baseline);
+    cv::Mat dep_SAD = SAD(l_rect, r_rect, 3, lconf.fx * scale, baseline);
+    dep_SAD         = map_back(pixel_map, dep_SAD);
     cv::imwrite("dep_SAD.jpg", dep_SAD);
     /* [/SAD] */
 

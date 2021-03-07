@@ -7,6 +7,7 @@ set(sources
     # Sources
 )
 
+set(CMAKE_CXX_FLAGS "-fopenmp ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
 set(CMAKE_C_FLAGS_RELEASE "-O2 -w -DNDEBUG")
 set(CMAKE_CXX_STANDARD 20)
