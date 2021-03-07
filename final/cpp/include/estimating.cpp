@@ -18,22 +18,21 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
     cv::Point2d pp(K[0][2], K[1][2]);
     flt         f = (K[0][0] + K[1][1]) / 2;
     cv::Mat     E = cv::findEssentialMat(pts1, pts2, f, pp, cv::RANSAC);
-    std::cout << E << std::endl;
 
     cv::Mat RMat, tMat;
     cv::recoverPose(E, pts1, pts2, RMat, tMat, f, pp);
-    // std::cout << RMat << std::endl;
-    // std::cout << tMat << std::endl;
+    std::cout << RMat << std::endl;
+    std::cout << tMat << std::endl;
     for (int i = 0; i < 3; ++i) {
         t[i] = tMat.at<flt>(i, 0);
         for (int j = 0; j < 3; ++j) {
-            R[i][j] = RMat.at<flt>(j, i);
+            R[i][j] = RMat.at<flt>(i, j);
         }
     }
 }
 
 cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
-            flt const &fx, flt const &baseline) {
+            MiscConf const &conf) {
     if (limg.rows != rimg.rows || //
         limg.cols != rimg.cols) {
         eprintf("Two input images has different sizes\n");
@@ -56,7 +55,9 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             uint32_t min_diff = std::numeric_limits<uint32_t>::max();
             int      pos      = -1;
             /* Iterate through the same row */
-            for (int rx = wr; rx < cols - wr; ++rx) {
+            // for (int rx = wr; rx < cols - wr; ++rx) {
+            for (int d = 0; d < conf.ndisp; ++d) {
+                int      rx       = x + d;
                 uint32_t cur_diff = std::numeric_limits<uint32_t>::max();
                 for (int i = -wr; i < wr; ++i) {
                     // cv::Vec3b lcol = limg.at<cv::Vec3b>(y, x);
@@ -80,7 +81,7 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
                 continue;
             }
             // vprintf("disparity = %d\n", std::abs(pos - x));
-            flt d                 = fx * baseline / std::abs(pos - x);
+            flt d = conf.left.fx * conf.baseline / std::abs(pos - x);
             depth.at<float>(y, x) = d;
             maxd                  = std::max(maxd, d);
             mind                  = std::min(mind, d);

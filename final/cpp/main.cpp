@@ -35,8 +35,9 @@ int main(int argc, char **argv) {
     if (rows != rimg.rows || cols != rimg.cols) {
         eprintf("The given 2 stereo images has different sizes\n");
     }
-    MiscConf conf;
-    auto [lconf, rconf] = read_calib(argv[3], conf);
+    MiscConf conf  = read_calib(argv[3]);
+    CamConf  lconf = conf.left;
+    CamConf  rconf = conf.right;
     /* [/Parse args] */
 
     /* [Stereo rectification] */
@@ -49,7 +50,7 @@ int main(int argc, char **argv) {
     /* [/Stereo rectification] */
 
     /* [SAD] */
-    cv::Mat dep_SAD = SAD(l_rect, r_rect, 3, lconf.fx, baseline);
+    cv::Mat dep_SAD = SAD(l_rect, r_rect, 3, conf);
     dep_SAD         = map_back(pixel_map, rows, cols, dep_SAD);
     cv::imwrite("dep_SAD.jpg", dep_SAD);
     /* [/SAD] */

@@ -52,6 +52,7 @@ struct SpatialPoint {
     vec3 color;
 };
 struct MiscConf {
+    CamConf  left, right;
     flt      doffs;
     flt      baseline;
     uint32_t width, height;
@@ -95,8 +96,7 @@ inline void dump(mat3 const &x) {
 template <typename T> T sq(T const &x) { return x * x; }
 
 std::tuple<CamConf, CamConf> read_cam(std::string const &filename);
-std::tuple<CamConf, CamConf> read_calib(std::string const &filename,
-                                        MiscConf &         out_conf);
+MiscConf                     read_calib(std::string const &filename);
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep);

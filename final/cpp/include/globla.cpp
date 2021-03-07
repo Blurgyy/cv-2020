@@ -58,9 +58,8 @@ std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
     return {lret, rret};
 }
 
-std::tuple<CamConf, CamConf> read_calib(std::string const &filename,
-                                        MiscConf &         out_conf) {
-    CamConf       lret, rret;
+MiscConf read_calib(std::string const &filename) {
+    MiscConf      ret;
     std::ifstream from{filename};
     if (from.fail()) {
         eprintf("Failed opening file %s\n", filename.c_str());
@@ -77,34 +76,36 @@ std::tuple<CamConf, CamConf> read_calib(std::string const &filename,
         std::string        token;
         in >> token;
         if (token == "cam0") {
-            in >> lret.fx >> dummy >> lret.cx >> dummy >> lret.fy >> lret.cy;
+            in >> ret.left.fx >> dummy >> ret.left.cx >> dummy >>
+                ret.left.fy >> ret.left.cy;
         } else if (token == "cam1") {
-            in >> rret.fx >> dummy >> rret.cx >> dummy >> rret.fy >> rret.cy;
+            in >> ret.right.fx >> dummy >> ret.right.cx >> dummy >>
+                ret.right.fy >> ret.right.cy;
         } else if (token == "doffs") {
-            in >> out_conf.doffs;
+            in >> ret.doffs;
         } else if (token == "baseline") {
-            in >> out_conf.baseline;
+            in >> ret.baseline;
         } else if (token == "width") {
-            in >> out_conf.width;
+            in >> ret.width;
         } else if (token == "height") {
-            in >> out_conf.height;
+            in >> ret.height;
         } else if (token == "ndisp") {
-            in >> out_conf.ndisp;
+            in >> ret.ndisp;
         } else if (token == "ndisp") {
-            in >> out_conf.ndisp;
+            in >> ret.ndisp;
         } else if (token == "isint") {
-            in >> out_conf.isint;
+            in >> ret.isint;
         } else if (token == "vmin") {
-            in >> out_conf.vmin;
+            in >> ret.vmin;
         } else if (token == "vmax") {
-            in >> out_conf.vmax;
+            in >> ret.vmax;
         } else if (token == "dyavg") {
-            in >> out_conf.dyavg;
+            in >> ret.dyavg;
         } else if (token == "dymax") {
-            in >> out_conf.dymax;
+            in >> ret.dymax;
         }
     }
-    return {lret, rret};
+    return ret;
 }
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,

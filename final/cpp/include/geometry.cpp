@@ -80,9 +80,6 @@ stereo_rectification(cv::Mat const &left_image, cv::Mat const &right_image,
     CamConf repconf;
     repconf.rot   = R;
     repconf.trans = t;
-    // CamConf repconf = get_reprojection_conf(right_camera, left_camera);
-    printf("repconf\n");
-    dump(repconf);
 
     /* Output baseline length */
     baseline = glm::length(repconf.trans);
