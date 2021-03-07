@@ -4,6 +4,34 @@
 
 #include <omp.h>
 
+void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
+                     std::vector<cv::KeyPoint> const &kp2,
+                     std::vector<cv::DMatch> const &matches, mat3 const &K,
+                     mat3 &R, vec3 &t) {
+    std::vector<cv::Point2f> pts1;
+    std::vector<cv::Point2f> pts2;
+    for (int i = 0; i < matches.size(); ++i) {
+        pts1.push_back(kp1[matches[i].queryIdx].pt);
+        pts2.push_back(kp2[matches[i].trainIdx].pt);
+    }
+
+    cv::Point2d pp(K[0][2], K[1][2]);
+    flt         f = (K[0][0] + K[1][1]) / 2;
+    cv::Mat     E = cv::findEssentialMat(pts1, pts2, f, pp, cv::RANSAC);
+    std::cout << E << std::endl;
+
+    cv::Mat RMat, tMat;
+    cv::recoverPose(E, pts1, pts2, RMat, tMat, f, pp);
+    // std::cout << RMat << std::endl;
+    // std::cout << tMat << std::endl;
+    for (int i = 0; i < 3; ++i) {
+        t[i] = tMat.at<flt>(i, 0);
+        for (int j = 0; j < 3; ++j) {
+            R[i][j] = RMat.at<flt>(j, i);
+        }
+    }
+}
+
 cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             flt const &fx, flt const &baseline) {
     if (limg.rows != rimg.rows || //

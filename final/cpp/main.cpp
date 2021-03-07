@@ -41,6 +41,20 @@ int main(int argc, char **argv) {
     std::vector<cv::KeyPoint> kp1, kp2;
     std::vector<cv::DMatch>   matches;
     get_matches(limg, rimg, kp1, kp2, matches);
+    // clang-format off
+    mat3 K{
+        1171, 0, 269.5,
+        0, 1171, 479.5,
+        0,    0,     1,
+    };
+    // clang-format on
+    mat3 R;
+    vec3 t;
+    pose_estimation(kp1, kp2, matches, K, R, t);
+    printf("e rotation:\n");
+    dump(R);
+    printf("e translation\n");
+    dump(t);
 
     /* [Stereo rectification] */
     cv::Mat          l_rect, r_rect;

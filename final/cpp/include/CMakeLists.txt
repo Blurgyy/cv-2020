@@ -4,6 +4,7 @@ project("wheels") # Project name
 set(target_name "wheels") # Target name (target can be an executable or a library)
 set(sources
     geometry.cpp
+    globla.cpp
     estimating.cpp
     # Sources
 )

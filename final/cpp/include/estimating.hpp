@@ -2,6 +2,11 @@
 
 #include "globla.hpp"
 
+void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
+                     std::vector<cv::KeyPoint> const &kp2,
+                     std::vector<cv::DMatch> const &matches, mat3 const &K,
+                     mat3 &R, vec3 &t);
+
 /* Sum of absolute difference (SAD)
  * @param `{l,r}img` **Rectified** stereo images.
  * @param `wr` Window radius, window size is: `wr` * 2 + 1

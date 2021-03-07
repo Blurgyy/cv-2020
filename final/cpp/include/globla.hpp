@@ -73,109 +73,27 @@ inline void dump(SpatialPoint const &x) {
     printf("color:    %f %f %f\n", x.color[0], x.color[1], x.color[2]);
 }
 inline void dump(vec3 const &x) { printf("%f %f %f\n", x.x, x.y, x.z); }
+inline void dump(mat3 const &x) {
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            printf("%f ", x[i][j]);
+        }
+        printf("\n");
+    }
+}
 
 /* Functions */
 template <typename T> T sq(T const &x) { return x * x; }
 
-inline std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
-    CamConf       lret, rret;
-    std::ifstream from{filename};
-    if (from.fail()) {
-        eprintf("Failed opening file %s\n", filename.c_str());
-    }
-    /* Check if reading is successful */
-    int six = 0;
-    for (std::string line; std::getline(from, line);) {
-        std::istringstream in{line};
-        std::string        token;
-        in >> token;
-        if (token == "fx") {
-            flt fx;
-            in >> fx;
-            lret.fx = rret.fx = fx;
-            ++six;
-        } else if (token == "cx") {
-            flt cx;
-            in >> cx;
-            lret.cx = rret.cx = cx;
-            ++six;
-        } else if (token == "cy") {
-            flt cy;
-            in >> cy;
-            lret.cy = rret.cy = cy;
-            ++six;
-        } else if (token == "fy") {
-            flt fy;
-            in >> fy;
-            lret.fy = rret.fy = fy;
-            ++six;
-        } else if (token == "left" || token == "Left") {
-            for (int i = 0; i < 3; ++i) {
-                std::getline(from, line);
-                in = std::istringstream{line};
-                in >> lret.rot[i][0] >> lret.rot[i][1] >> lret.rot[i][2] >>
-                    lret.trans[i];
-            }
-            ++six;
-        } else if (token == "right" || token == "Right") {
-            for (int i = 0; i < 3; ++i) {
-                std::getline(from, line);
-                in = std::istringstream{line};
-                in >> rret.rot[i][0] >> rret.rot[i][1] >> rret.rot[i][2] >>
-                    rret.trans[i];
-            }
-            ++six;
-        }
-    }
-    if (six != 6) {
-        dump(lret);
-        dump(rret);
-        eprintf("Failed reading camera configs\n");
-    }
-    return {lret, rret};
-}
+std::tuple<CamConf, CamConf> read_cam(std::string const &filename);
 
-inline cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
-                        int const &cols, cv::Mat const &dep) {
-    int     drows = dep.rows;
-    int     dcols = dep.cols;
-    cv::Mat ret   = cv::Mat(rows, cols, CV_32FC1, -1);
+cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
+                 int const &cols, cv::Mat const &dep);
 
-    flt mind = std::numeric_limits<flt>::max();
-    flt maxd = std::numeric_limits<flt>::lowest();
-    for (ppp const &item : pixel_map) {
-        SpatialPoint dep_p = item.second;
-        int          dep_x = dep_p.pos.x;
-        int          dep_y = dep_p.pos.y;
-        if (0 <= dep_x && dep_x < dcols && //
-            0 <= dep_y && dep_y < drows) {
-            SpatialPoint ori_p          = item.first;
-            int          ori_x          = ori_p.pos.x;
-            int          ori_y          = ori_p.pos.y;
-            flt          depth          = dep.at<float>(dep_y, dep_x);
-            ret.at<float>(ori_y, ori_x) = depth;
-
-            mind = std::min(mind, depth);
-            maxd = std::max(maxd, depth);
-        }
-    }
-
-    /* [Normalize] */
-    for (int y = 0; y < rows; ++y) {
-        for (int x = 0; x < cols; ++x) {
-            float &value = ret.at<float>(y, x);
-            if (value < 0) {
-                continue;
-            }
-            value = (value - mind) / (maxd - mind);
-            value = std::pow(value, 0.3);
-            value = value * 256 - 0.5;
-        }
-    }
-    /* [/Normalize] */
-
-    return ret;
-}
+void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
+                 std::vector<cv::KeyPoint> &kp1,
+                 std::vector<cv::KeyPoint> &kp2,
+                 std::vector<cv::DMatch> &  matches);
 
 struct progress {
     progress(int const &tot = 1) : now(0), tot(tot) {}
