@@ -58,6 +58,32 @@ std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
     return {lret, rret};
 }
 
+std::tuple<CamConf, CamConf> read_calib(std::string const &filename) {
+    CamConf       lret, rret;
+    std::ifstream from{filename};
+    if (from.fail()) {
+        eprintf("Failed opening file %s\n", filename.c_str());
+    }
+    flt dummy;
+    for (std::string line; std::getline(from, line);) {
+        for (int i = 0; i < line.length(); ++i) {
+            if (line[i] == '=' || line[i] == '[' || line[i] == ']' ||
+                line[i] == ';') {
+                line[i] = ' ';
+            }
+        }
+        std::istringstream in{line};
+        std::string        token;
+        in >> token;
+        if (token == "cam0") {
+            in >> lret.fx >> dummy >> lret.cx >> dummy >> lret.fy >> lret.cy;
+        } else if (token == "cam1") {
+            in >> rret.fx >> dummy >> rret.cx >> dummy >> rret.fy >> rret.cy;
+        }
+    }
+    return {lret, rret};
+}
+
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep) {
     int     drows = dep.rows;
@@ -136,6 +162,10 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
             matches.push_back(all_matches[y]);
         }
     }
+
+    // cv::Mat img;
+    // cv::drawMatches(limg, kp1, rimg, kp2, matches, img);
+    // cv::imwrite("matched.png", img);
 }
 
 // Author: Blurgy <gy@blurgy.xyz>

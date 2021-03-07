@@ -86,6 +86,7 @@ inline void dump(mat3 const &x) {
 template <typename T> T sq(T const &x) { return x * x; }
 
 std::tuple<CamConf, CamConf> read_cam(std::string const &filename);
+std::tuple<CamConf, CamConf> read_calib(std::string const &filename);
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep);

@@ -35,7 +35,9 @@ int main(int argc, char **argv) {
     if (rows != rimg.rows || cols != rimg.cols) {
         eprintf("The given 2 stereo images has different sizes\n");
     }
-    auto [lconf, rconf] = read_cam(argv[3]);
+    auto [lconf, rconf] = read_calib(argv[3]);
+    dump(lconf);
+    dump(rconf);
     /* [/Parse args] */
 
     std::vector<cv::KeyPoint> kp1, kp2;
@@ -61,6 +63,8 @@ int main(int argc, char **argv) {
     flt              baseline  = std::numeric_limits<flt>::lowest();
     std::vector<ppp> pixel_map = stereo_rectification(
         limg, rimg, lconf, rconf, l_rect, r_rect, baseline);
+    cv::imwrite("l_rect.jpg", l_rect);
+    cv::imwrite("r_rect.jpg", r_rect);
     /* [/Stereo rectification] */
 
     /* [SAD] */
@@ -68,9 +72,6 @@ int main(int argc, char **argv) {
     dep_SAD         = map_back(pixel_map, rows, cols, dep_SAD);
     cv::imwrite("dep_SAD.jpg", dep_SAD);
     /* [/SAD] */
-
-    cv::imwrite("l_rect.jpg", l_rect);
-    cv::imwrite("r_rect.jpg", r_rect);
 
     return 0;
 }
