@@ -51,6 +51,15 @@ struct SpatialPoint {
     vec3 pos;
     vec3 color;
 };
+struct MiscConf {
+    flt      doffs;
+    flt      baseline;
+    uint32_t width, height;
+    uint32_t ndisp;
+    bool     isint;
+    uint32_t vmin, vmax;
+    flt      dyavg, dymax;
+};
 using ppp = std::pair<SpatialPoint, SpatialPoint>;
 
 /* Struct helper functions */
@@ -86,7 +95,8 @@ inline void dump(mat3 const &x) {
 template <typename T> T sq(T const &x) { return x * x; }
 
 std::tuple<CamConf, CamConf> read_cam(std::string const &filename);
-std::tuple<CamConf, CamConf> read_calib(std::string const &filename);
+std::tuple<CamConf, CamConf> read_calib(std::string const &filename,
+                                        MiscConf &         out_conf);
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep);

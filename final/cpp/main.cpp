@@ -35,7 +35,8 @@ int main(int argc, char **argv) {
     if (rows != rimg.rows || cols != rimg.cols) {
         eprintf("The given 2 stereo images has different sizes\n");
     }
-    auto [lconf, rconf] = read_calib(argv[3]);
+    MiscConf conf;
+    auto [lconf, rconf] = read_calib(argv[3], conf);
     /* [/Parse args] */
 
     /* [Stereo rectification] */
