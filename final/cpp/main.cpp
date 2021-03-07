@@ -1,6 +1,6 @@
+#include "estimating.hpp"
 #include "geometry.hpp"
 #include "globla.hpp"
-#include "matching.hpp"
 
 #include <cassert>
 #include <cstdio>
@@ -37,6 +37,10 @@ int main(int argc, char **argv) {
     }
     auto [lconf, rconf] = read_cam(argv[3]);
     /* [/Parse args] */
+
+    std::vector<cv::KeyPoint> kp1, kp2;
+    std::vector<cv::DMatch>   matches;
+    get_matches(limg, rimg, kp1, kp2, matches);
 
     /* [Stereo rectification] */
     cv::Mat          l_rect, r_rect;
