@@ -168,7 +168,7 @@ inline cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                 continue;
             }
             value = (value - mind) / (maxd - mind);
-            value = std::pow(value, 0.4);
+            value = std::pow(value, 0.3);
             value = value * 256 - 0.5;
         }
     }
@@ -176,6 +176,17 @@ inline cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
 
     return ret;
 }
+
+struct progress {
+    progress(int const &tot = 1) : now(0), tot(tot) {}
+    int  now;
+    int  tot;
+    void advance() {
+        printf("\33[2K");
+        ++now;
+        vprintf("%g%%\r", 100.0 * now / tot);
+    }
+};
 
 // Author: Blurgy <gy@blurgy.xyz>
 // Date:   Jan 25 2021, 18:43 [CST]

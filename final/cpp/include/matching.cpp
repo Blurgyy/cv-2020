@@ -17,6 +17,7 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
     flt maxd = std::numeric_limits<flt>::lowest();
     flt mind = std::numeric_limits<flt>::max();
 
+    progress p(rows - wr * 2);
     /* For every pixel on the left image .. */
 #pragma omp parallel for
     for (int y = wr; y < rows - wr; ++y) {
@@ -56,9 +57,8 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             maxd                  = std::max(maxd, d);
             mind                  = std::min(mind, d);
         }
+        p.advance();
     }
-
-    vprintf("maxd is %f, mind is %f\n", maxd, mind);
 
     return depth;
 }
