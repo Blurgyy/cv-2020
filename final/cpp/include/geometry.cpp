@@ -64,8 +64,6 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
 
     int len = lpts.size();
     // clang-format off
-    // 1   │ cam0=[2945.377 0 1284.862; 0 2945.377 954.52; 0 0 1]
-    // 2   │ cam1=[2945.377 0 1455.543; 0 2945.377 954.52; 0 0 1]
     mat3 K{
         left_camera.fx, 0, left_camera.cx,
         0, left_camera.fy, left_camera.cy,
@@ -130,6 +128,9 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     int rows              = std::round(maxy) - std::round(miny) + 1;
     rectified_left_image  = cv::Mat(rows, cols, left_image.type());
     rectified_right_image = cv::Mat(rows, cols, right_image.type());
+
+    rectified_left_image  = 0;
+    rectified_right_image = 0;
 
     for (int i = 0; i < len; ++i) {
         SpatialPoint lp = limgpts[i];

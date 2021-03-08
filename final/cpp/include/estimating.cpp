@@ -39,7 +39,8 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
     }
     int     rows = left_image.rows;
     int     cols = left_image.cols;
-    cv::Mat disparity(rows, cols, CV_64FC1, -1);
+    cv::Mat disparity(rows, cols, CV_64FC1);
+    disparity = 0;
 
     cv::Mat limg, rimg;
     cv::cvtColor(left_image, limg, cv::COLOR_BGR2GRAY);
@@ -90,7 +91,8 @@ cv::Mat NCC(cv::Mat const &left_image, cv::Mat const &right_image,
     }
     int     rows = left_image.rows;
     int     cols = left_image.cols;
-    cv::Mat disparity(rows, cols, CV_64FC1, -1);
+    cv::Mat disparity(rows, cols, CV_64FC1);
+    disparity = 0;
 
     cv::Mat limg, rimg;
     cv::cvtColor(left_image, limg, cv::COLOR_BGR2GRAY);
