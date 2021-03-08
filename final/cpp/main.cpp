@@ -52,7 +52,9 @@ int main(int argc, char **argv) {
     /* [SAD] */
     cv::Mat dep_SAD = SAD(l_rect, r_rect, 2, conf);
     dep_SAD         = map_back(pixel_map, rows, cols, dep_SAD);
-    cv::imwrite("dep_SAD.jpg", dep_SAD);
+    cv::imwrite("dep_SAD.pgm", dep_SAD);
+    cv::Mat dep_SAD_vis = visualize(dep_SAD);
+    cv::imwrite("dep_SAD.jpg", dep_SAD_vis);
     /* [/SAD] */
 
     return 0;

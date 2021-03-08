@@ -100,6 +100,7 @@ MiscConf                     read_calib(std::string const &filename);
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep);
+cv::Mat visualize(cv::Mat const &input, flt const &gamma = 0.3);
 
 void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
                  std::vector<cv::KeyPoint> &kp1,

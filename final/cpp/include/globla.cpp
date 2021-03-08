@@ -112,41 +112,58 @@ cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep) {
     int     drows = dep.rows;
     int     dcols = dep.cols;
-    cv::Mat ret   = cv::Mat(rows, cols, CV_32FC1, -1);
+    cv::Mat ret   = cv::Mat(rows, cols, CV_64FC1, -1);
 
-    flt mind = std::numeric_limits<flt>::max();
-    flt maxd = std::numeric_limits<flt>::lowest();
     for (ppp const &item : pixel_map) {
         SpatialPoint dep_p = item.second;
         int          dep_x = dep_p.pos.x;
         int          dep_y = dep_p.pos.y;
         if (0 <= dep_x && dep_x < dcols && //
             0 <= dep_y && dep_y < drows) {
-            SpatialPoint ori_p          = item.first;
-            int          ori_x          = ori_p.pos.x;
-            int          ori_y          = ori_p.pos.y;
-            flt          depth          = dep.at<float>(dep_y, dep_x);
-            ret.at<float>(ori_y, ori_x) = depth;
-
-            mind = std::min(mind, depth);
-            maxd = std::max(maxd, depth);
+            SpatialPoint ori_p        = item.first;
+            int          ori_x        = ori_p.pos.x;
+            int          ori_y        = ori_p.pos.y;
+            flt          depth        = dep.at<flt>(dep_y, dep_x);
+            ret.at<flt>(ori_y, ori_x) = depth;
         }
     }
 
-    /* [Normalize] */
+    return ret;
+}
+
+cv::Mat visualize(cv::Mat const &input, flt const &gamma) {
+    if (input.channels() != 1) {
+        eprintf("More than 1 channels encountered when attempting to "
+                "normalize image\n");
+    }
+
+    int rows = input.rows;
+    int cols = input.cols;
+
+    cv::Mat ret(rows, cols, CV_8UC1);
+
+    flt maxd = std::numeric_limits<flt>::lowest();
+    flt mind = std::numeric_limits<flt>::max();
+
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
-            float &value = ret.at<float>(y, x);
-            if (value < 0) {
-                continue;
-            }
-            value = (value - mind) / (maxd - mind);
-            value = std::pow(value, 0.3);
-            value = value * 256 - 0.5;
+            flt const &value = input.at<flt>(y, x);
+            maxd             = std::max<flt>(maxd, value);
+            mind             = std::min<flt>(mind, value);
         }
     }
-    /* [/Normalize] */
 
+    for (int y = 0; y < rows; ++y) {
+        for (int x = 0; x < cols; ++x) {
+            flt const &ivalue     = input.at<flt>(y, x);
+            flt        value      = (ivalue - mind) / (maxd - mind);
+            value                 = std::pow(value, gamma);
+            value                 = value * 256 - 0.5;
+            ret.at<uint8_t>(y, x) = static_cast<uint8_t>(value);
+        }
+    }
+
+    cv::applyColorMap(ret, ret, cv::COLORMAP_JET);
     return ret;
 }
 

@@ -39,7 +39,7 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
     }
     int     rows = limg.rows;
     int     cols = limg.cols;
-    cv::Mat depth(rows, cols, CV_32FC1, -1);
+    cv::Mat depth(rows, cols, CV_64FC1, -1);
 
     flt maxd = std::numeric_limits<flt>::lowest();
     flt mind = std::numeric_limits<flt>::max();
@@ -82,9 +82,9 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             }
             // vprintf("disparity = %d\n", std::abs(pos - x));
             flt d = conf.left.fx * conf.baseline / std::abs(pos - x);
-            depth.at<float>(y, x) = d;
-            maxd                  = std::max(maxd, d);
-            mind                  = std::min(mind, d);
+            depth.at<flt>(y, x) = d;
+            maxd                = std::max(maxd, d);
+            mind                = std::min(mind, d);
         }
         p.advance();
     }
