@@ -54,8 +54,10 @@ int main(int argc, char **argv) {
     // std::vector<ppp> pixel_map;
     // /* [/No rectification] */
 
+    int wr = 5;
+
     /* [SAD] */
-    cv::Mat dep_SAD = SAD(l_rect, r_rect, 5, conf);
+    cv::Mat dep_SAD = SAD(l_rect, r_rect, wr, conf);
     dep_SAD         = map_back(pixel_map, rows, cols, dep_SAD);
     cv::imwrite("dep_SAD.pgm", dep_SAD);
     cv::Mat dep_SAD_vis = visualize(dep_SAD);
@@ -63,7 +65,7 @@ int main(int argc, char **argv) {
     /* [/SAD] */
 
     /* [NCC] */
-    cv::Mat dep_NCC = NCC(l_rect, r_rect, 5, conf);
+    cv::Mat dep_NCC = NCC(l_rect, r_rect, wr, conf);
     dep_NCC         = map_back(pixel_map, rows, cols, dep_NCC);
     cv::imwrite("dep_NCC.pgm", dep_NCC);
     cv::Mat dep_NCC_vis = visualize(dep_NCC);
