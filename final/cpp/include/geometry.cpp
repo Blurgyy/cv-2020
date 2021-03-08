@@ -79,8 +79,8 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     get_matches(left_image, right_image, kp1, kp2, matches);
     pose_estimation(kp1, kp2, matches, K, R, t);
     CamConf repconf;
-    repconf.rot   = R;
-    repconf.trans = t;
+    repconf.rot   = glm::transpose(R);
+    repconf.trans = -t * glm::transpose(R);
 
     /* 1. Rotate right image to let it be parallel with left image */
     for (int i = 0; i < len; ++i) {
@@ -93,8 +93,8 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
 
     /* 2. Rotate both images by R_{rect} */
     vec3 row1 = glm::normalize(repconf.trans);
-    vec3 row2 = vec3{-row1.y, row1.x, 0} / std::sqrt(sq(row1.x) + sq(row1.y));
-    vec3 row3 = glm::cross(row1, row2);
+    vec3 row2 = glm::normalize(vec3{-row1.y, row1.x, 0});
+    vec3 row3 = glm::normalize(glm::cross(row1, row2));
     // clang-format off
     mat3 R_rect{
         row1.x, row1.y, row1.z,
@@ -119,7 +119,7 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
         maxy = std::max(maxy, lp.pos.y);
         miny = std::min(miny, lp.pos.y);
 
-        vec3 rcampt = (to_camera_space(right_camera, rpts[i]).pos * R_rect);
+        vec3 rcampt = to_camera_space(right_camera, rpts[i]).pos * R_rect;
         SpatialPoint rp =
             to_image_space(right_camera, {rcampt, rpts[i].color});
         rimgpts.push_back(rp);

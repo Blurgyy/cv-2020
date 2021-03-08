@@ -24,9 +24,9 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
     std::cout << RMat << std::endl;
     std::cout << tMat << std::endl;
     for (int i = 0; i < 3; ++i) {
-        t[i] = -tMat.at<flt>(i, 0);
+        t[i] = tMat.at<flt>(i, 0);
         for (int j = 0; j < 3; ++j) {
-            R[i][j] = RMat.at<flt>(j, i);
+            R[i][j] = RMat.at<flt>(i, j);
         }
     }
 }

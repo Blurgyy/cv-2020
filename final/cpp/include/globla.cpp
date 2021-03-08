@@ -204,9 +204,9 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
         }
     }
 
-    // cv::Mat img;
-    // cv::drawMatches(limg, kp1, rimg, kp2, matches, img);
-    // cv::imwrite("matched.png", img);
+    cv::Mat img;
+    cv::drawMatches(limg, kp1, rimg, kp2, matches, img);
+    cv::imwrite("matched.png", img);
 }
 
 // Author: Blurgy <gy@blurgy.xyz>
