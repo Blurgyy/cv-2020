@@ -78,21 +78,11 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
     std::vector<cv::DMatch>   matches;
     get_matches(left_image, right_image, kp1, kp2, matches);
     pose_estimation(kp1, kp2, matches, K, R, t);
-    CamConf repconf;
-    repconf.rot   = glm::transpose(R);
-    repconf.trans = -t * glm::transpose(R);
+    mat3 R2    = glm::transpose(R);
+    vec3 trans = -t * glm::transpose(R);
 
-    /* 1. Rotate right image to let it be parallel with left image */
-    for (int i = 0; i < len; ++i) {
-        vec3 ncoord =
-            to_camera_space(right_camera, rpts[i]).pos * repconf.rot;
-        SpatialPoint p = {ncoord, rpts[i].color};
-        p              = to_image_space(right_camera, p);
-        rpts[i]        = p;
-    }
-
-    /* 2. Rotate both images by R_{rect} */
-    vec3 row1 = glm::normalize(repconf.trans);
+    /* Get rectification matrix */
+    vec3 row1 = glm::normalize(trans);
     vec3 row2 = glm::normalize(vec3{-row1.y, row1.x, 0});
     vec3 row3 = glm::normalize(glm::cross(row1, row2));
     // clang-format off
@@ -102,7 +92,10 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
         row3.x, row3.y, row3.z,
     };
     // clang-format on
-    /* 2.1 rotate left image plane */
+
+    R2      = R2 * R_rect;
+    mat3 R1 = R_rect;
+
     flt maxx = std::numeric_limits<flt>::lowest();
     flt maxy = std::numeric_limits<flt>::lowest();
     flt minx = std::numeric_limits<flt>::max();
@@ -110,23 +103,27 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
 
     std::vector<SpatialPoint> limgpts, rimgpts;
     for (int i = 0; i < len; ++i) {
-        vec3 lcampt = to_camera_space(left_camera, lpts[i]).pos * R_rect;
-        SpatialPoint lp =
-            to_image_space(left_camera, {lcampt, lpts[i].color});
-        limgpts.push_back(lp);
-        maxx = std::max(maxx, lp.pos.x);
-        minx = std::min(minx, lp.pos.x);
-        maxy = std::max(maxy, lp.pos.y);
-        miny = std::min(miny, lp.pos.y);
+        vec3         ncoord = to_camera_space(right_camera, rpts[i]).pos * R2;
+        SpatialPoint p      = {ncoord, rpts[i].color};
+        p                   = to_image_space(right_camera, p);
+        rimgpts.push_back(p);
 
-        vec3 rcampt = to_camera_space(right_camera, rpts[i]).pos * R_rect;
-        SpatialPoint rp =
-            to_image_space(right_camera, {rcampt, rpts[i].color});
-        rimgpts.push_back(rp);
-        maxx = std::max(maxx, rp.pos.x);
-        minx = std::min(minx, rp.pos.x);
-        maxy = std::max(maxy, rp.pos.y);
-        miny = std::min(miny, rp.pos.y);
+        ncoord = to_camera_space(left_camera, lpts[i]).pos * R1;
+        p      = {ncoord, lpts[i].color};
+        p      = to_image_space(left_camera, p);
+        limgpts.push_back(p);
+
+        SpatialPoint lp = limgpts[i];
+        maxx            = std::max(maxx, lp.pos.x);
+        minx            = std::min(minx, lp.pos.x);
+        maxy            = std::max(maxy, lp.pos.y);
+        miny            = std::min(miny, lp.pos.y);
+
+        SpatialPoint rp = rimgpts[i];
+        maxx            = std::max(maxx, rp.pos.x);
+        minx            = std::min(minx, rp.pos.x);
+        maxy            = std::max(maxy, rp.pos.y);
+        miny            = std::min(miny, rp.pos.y);
     }
 
     int cols              = std::round(maxx) - std::round(minx) + 1;
