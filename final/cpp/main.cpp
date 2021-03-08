@@ -40,14 +40,19 @@ int main(int argc, char **argv) {
     CamConf  rconf = conf.right;
     /* [/Parse args] */
 
+    cv::Mat l_rect, r_rect;
     /* [Stereo rectification] */
-    cv::Mat          l_rect, r_rect;
     flt              baseline = std::numeric_limits<flt>::lowest();
     std::vector<ppp> pixel_map =
         stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
     cv::imwrite("l_rect.jpg", l_rect);
     cv::imwrite("r_rect.jpg", r_rect);
     /* [/Stereo rectification] */
+    // /* [No rectification] */
+    // l_rect = limg;
+    // r_rect = rimg;
+    // std::vector<ppp> pixel_map;
+    // /* [/No rectification] */
 
     /* [SAD] */
     cv::Mat dep_SAD = SAD(l_rect, r_rect, 2, conf);
@@ -56,6 +61,9 @@ int main(int argc, char **argv) {
     cv::Mat dep_SAD_vis = visualize(dep_SAD);
     cv::imwrite("dep_SAD.jpg", dep_SAD_vis);
     /* [/SAD] */
+
+    /* [NCC] */
+    /* [/NCC] */
 
     return 0;
 }

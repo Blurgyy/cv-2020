@@ -110,6 +110,9 @@ MiscConf read_calib(std::string const &filename) {
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &dep) {
+    if (pixel_map.size() == 0) {
+        return dep;
+    }
     int     drows = dep.rows;
     int     dcols = dep.cols;
     cv::Mat ret   = cv::Mat(rows, cols, CV_64FC1, -1);
