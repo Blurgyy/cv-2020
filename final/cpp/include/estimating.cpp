@@ -49,7 +49,7 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
     /* For every pixel on the left image .. */
 #pragma omp parallel for
     for (int y = wr; y < rows - wr; ++y) {
-        for (int x = wr - conf.ndisp; x < cols - wr; ++x) {
+        for (int x = wr + conf.ndisp; x < cols - wr; ++x) {
             /* Find the corresponding window that has minimal difference with
              * it on the right image.
              */
@@ -100,33 +100,39 @@ cv::Mat NCC(cv::Mat const &left_image, cv::Mat const &right_image,
 #pragma omp parallel for
     for (int y = wr; y < rows - wr; ++y) {
         for (int x = wr + conf.ndisp; x < cols - wr; ++x) {
-            uint32_t lisum  = 0;
-            uint32_t li2sum = 0;
-            for (int i = -wr; i < wr; ++i) {
-                for (int j = -wr; j < wr; ++j) {
-                    int lcol = limg.at<uint8_t>(y + j, x + i);
-                    lisum += lcol;
-                    li2sum += sq(lcol);
-                }
-            }
-
             int pos      = -1;
-            flt max_loss = std::numeric_limits<flt>::lowest();
+            flt max_corr = std::numeric_limits<flt>::lowest();
+
             for (int d = 0; d < conf.ndisp; ++d) {
-                int      rx     = x - d;
-                uint32_t risum  = 0;
-                uint32_t ri2sum = 0;
+                int rx = x - d;
+
+                flt lavg = 0;
+                flt ravg = 0;
                 for (int i = -wr; i < wr; ++i) {
                     for (int j = -wr; j < wr; ++j) {
-                        int rcol = rimg.at<uint8_t>(y + j, rx + i);
-                        risum += rcol;
-                        ri2sum += sq(rcol);
+                        lavg += limg.at<uint8_t>(y + j, x + i);
+                        ravg += rimg.at<uint8_t>(y + j, rx + i);
                     }
                 }
+                lavg /= sq(2 * wr + 1);
+                ravg /= sq(2 * wr + 1);
 
-                flt cur_loss = lisum * risum / std::sqrt(li2sum * ri2sum);
-                if (max_loss < cur_loss) {
-                    max_loss = cur_loss;
+                flt cur_corr = 0;
+                flt lstd     = 0;
+                flt rstd     = 0;
+                for (int i = -wr; i < wr; ++i) {
+                    for (int j = -wr; j < wr; ++j) {
+                        flt lcol = limg.at<uint8_t>(y + j, x + i);
+                        flt rcol = rimg.at<uint8_t>(y + j, rx + i);
+                        cur_corr += (lcol - lavg) * (rcol - ravg);
+                        lstd += sq(lcol - lavg);
+                        rstd += sq(rcol - ravg);
+                    }
+                }
+                cur_corr /= std::sqrt(lstd * rstd);
+
+                if (max_corr < cur_corr) {
+                    max_corr = cur_corr;
                     pos      = rx;
                 }
             }
