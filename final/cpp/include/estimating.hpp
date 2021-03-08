@@ -12,7 +12,8 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
  * @param `wr` Window radius, window size is: `wr` * 2 + 1
  * @param `fx` **Effective** focal length on `x` axis of the 2 given rectified
  *        stereo images.
- * @return Depth map.
+ * @param `conf` Configs.
+ * @return Disparity map.
  */
 cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             MiscConf const &conf);
