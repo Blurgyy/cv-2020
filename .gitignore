@@ -26,6 +26,7 @@ ROADMAP.md
 *.jpg
 *.JPG
 *.png
+*.pgm
 
 # ClangD cache
 .cache/
