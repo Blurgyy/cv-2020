@@ -58,7 +58,7 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
             // for (int rx = wr; rx < cols - wr; ++rx) {
             for (int d = 0; d < conf.ndisp; ++d) {
                 int      rx       = x - d;
-                uint32_t cur_diff = std::numeric_limits<uint32_t>::max();
+                uint32_t cur_diff = 0;
                 for (int i = -wr; i < wr; ++i) {
                     // cv::Vec3b lcol = limg.at<cv::Vec3b>(y, x);
                     if (!inrange(x + i, 0, cols) ||
