@@ -31,15 +31,19 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
     }
 }
 
-cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
-            MiscConf const &conf) {
-    if (limg.rows != rimg.rows || //
-        limg.cols != rimg.cols) {
+cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
+            int const &wr, MiscConf const &conf) {
+    if (left_image.rows != right_image.rows || //
+        left_image.cols != right_image.cols) {
         eprintf("Two input images has different sizes\n");
     }
-    int     rows = limg.rows;
-    int     cols = limg.cols;
+    int     rows = left_image.rows;
+    int     cols = left_image.cols;
     cv::Mat disparity(rows, cols, CV_64FC1, -1);
+
+    cv::Mat limg, rimg;
+    cv::cvtColor(left_image, limg, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(right_image, rimg, cv::COLOR_BGR2GRAY);
 
     flt maxd = std::numeric_limits<flt>::lowest();
     flt mind = std::numeric_limits<flt>::max();
@@ -69,14 +73,9 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
                         if (!inrange(y + j, 0, rows)) {
                             continue;
                         }
-                        cv::Vec3b lcol = limg.at<cv::Vec3b>(y + j, x + i);
-                        cv::Vec3b rcol = rimg.at<cv::Vec3b>(y + j, rx + i);
-                        cur_diff += std::abs(static_cast<int>(lcol[0]) -
-                                             static_cast<int>(rcol[0]));
-                        cur_diff += std::abs(static_cast<int>(lcol[1]) -
-                                             static_cast<int>(rcol[1]));
-                        cur_diff += std::abs(static_cast<int>(lcol[2]) -
-                                             static_cast<int>(rcol[2]));
+                        int lcol = limg.at<uint8_t>(y + j, x + i);
+                        int rcol = rimg.at<uint8_t>(y + j, rx + i);
+                        cur_diff += std::abs(lcol - rcol);
                     }
                 }
                 if (min_diff > cur_diff) {
@@ -96,7 +95,7 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
         p.advance();
     }
 
-    return depth;
+    return disparity;
 }
 
 // Author: Blurgy <gy@blurgy.xyz>

@@ -15,8 +15,8 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
  * @param `conf` Configs.
  * @return Disparity map.
  */
-cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
-            MiscConf const &conf);
+cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
+            int const &wr, MiscConf const &conf);
 
 // Author: Blurgy <gy@blurgy.xyz>
 // Date:   Feb 27 2021, 17:20 [CST]
