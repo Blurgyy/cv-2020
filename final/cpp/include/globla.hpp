@@ -93,7 +93,10 @@ inline void dump(mat3 const &x) {
 }
 
 /* Functions */
-template <typename T> T sq(T const &x) { return x * x; }
+template <typename T> T    sq(T const &x) { return x * x; }
+template <typename T> bool inrange(T const &x, T const &lo, T const &hi) {
+    return lo <= x && x < hi;
+}
 
 std::tuple<CamConf, CamConf> read_cam(std::string const &filename);
 MiscConf                     read_calib(std::string const &filename);

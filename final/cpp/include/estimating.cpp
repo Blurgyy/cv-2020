@@ -61,7 +61,14 @@ cv::Mat SAD(cv::Mat const &limg, cv::Mat const &rimg, int const &wr,
                 uint32_t cur_diff = std::numeric_limits<uint32_t>::max();
                 for (int i = -wr; i < wr; ++i) {
                     // cv::Vec3b lcol = limg.at<cv::Vec3b>(y, x);
+                    if (!inrange(x + i, 0, cols) ||
+                        !inrange(rx + i, 0, cols)) {
+                        continue;
+                    }
                     for (int j = -wr; j < wr; ++j) {
+                        if (!inrange(y + j, 0, rows)) {
+                            continue;
+                        }
                         cv::Vec3b lcol = limg.at<cv::Vec3b>(y + j, x + i);
                         cv::Vec3b rcol = rimg.at<cv::Vec3b>(y + j, rx + i);
                         cur_diff += std::abs(static_cast<int>(lcol[0]) -
