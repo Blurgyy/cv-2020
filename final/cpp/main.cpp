@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     // /* [/No rectification] */
 
     /* [SAD] */
-    cv::Mat dep_SAD = SAD(l_rect, r_rect, 2, conf);
+    cv::Mat dep_SAD = SAD(l_rect, r_rect, 1, conf);
     dep_SAD         = map_back(pixel_map, rows, cols, dep_SAD);
     cv::imwrite("dep_SAD.pgm", dep_SAD);
     cv::Mat dep_SAD_vis = visualize(dep_SAD);
@@ -63,6 +63,11 @@ int main(int argc, char **argv) {
     /* [/SAD] */
 
     /* [NCC] */
+    cv::Mat dep_NCC = NCC(l_rect, r_rect, 1, conf);
+    dep_NCC         = map_back(pixel_map, rows, cols, dep_NCC);
+    cv::imwrite("dep_NCC.pgm", dep_NCC);
+    cv::Mat dep_NCC_vis = visualize(dep_NCC);
+    cv::imwrite("dep_NCC.jpg", dep_NCC_vis);
     /* [/NCC] */
 
     return 0;

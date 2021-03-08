@@ -111,13 +111,16 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
                  std::vector<cv::DMatch> &  matches);
 
 struct progress {
-    progress(int const &tot = 1) : now(0), tot(tot) {}
-    int  now;
-    int  tot;
-    void advance() {
+    progress(int const &tot = 1, std::string const &title = "progress")
+        : now(0), tot(tot), title{title} {}
+    int         now;
+    int         tot;
+    std::string title;
+    void        advance() {
         printf("\33[2K");
         ++now;
-        vprintf("%g%%\r", 100.0 * now / tot);
+        vprintf("%s: %g%%\r", this->title.c_str(),
+                100.0 * this->now / this->tot);
     }
 };
 

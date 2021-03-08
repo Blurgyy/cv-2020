@@ -45,14 +45,11 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
     cv::cvtColor(left_image, limg, cv::COLOR_BGR2GRAY);
     cv::cvtColor(right_image, rimg, cv::COLOR_BGR2GRAY);
 
-    flt maxd = std::numeric_limits<flt>::lowest();
-    flt mind = std::numeric_limits<flt>::max();
-
-    progress p(rows - wr * 2);
+    progress p(rows - wr * 2, "SAD");
     /* For every pixel on the left image .. */
 #pragma omp parallel for
     for (int y = wr; y < rows - wr; ++y) {
-        for (int x = wr; x < cols - wr; ++x) {
+        for (int x = wr - conf.ndisp; x < cols - wr; ++x) {
             /* Find the corresponding window that has minimal difference with
              * it on the right image.
              */
@@ -64,15 +61,7 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
                 int      rx       = x - d;
                 uint32_t cur_diff = 0;
                 for (int i = -wr; i < wr; ++i) {
-                    // cv::Vec3b lcol = limg.at<cv::Vec3b>(y, x);
-                    if (!inrange(x + i, 0, cols) ||
-                        !inrange(rx + i, 0, cols)) {
-                        continue;
-                    }
                     for (int j = -wr; j < wr; ++j) {
-                        if (!inrange(y + j, 0, rows)) {
-                            continue;
-                        }
                         int lcol = limg.at<uint8_t>(y + j, x + i);
                         int rcol = rimg.at<uint8_t>(y + j, rx + i);
                         cur_diff += std::abs(lcol - rcol);
@@ -83,14 +72,67 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
                     pos      = rx;
                 }
             }
-            if (pos == x) {
-                continue;
+            // vprintf("disparity = %d\n", std::abs(pos - x));
+            flt d                   = std::abs(x - pos);
+            disparity.at<flt>(y, x) = d;
+        }
+        p.advance();
+    }
+
+    return disparity;
+}
+
+cv::Mat NCC(cv::Mat const &left_image, cv::Mat const &right_image,
+            int const &wr, MiscConf const &conf) {
+    if (left_image.rows != right_image.rows || //
+        left_image.cols != right_image.cols) {
+        eprintf("Two input images has different sizes\n");
+    }
+    int     rows = left_image.rows;
+    int     cols = left_image.cols;
+    cv::Mat disparity(rows, cols, CV_64FC1, -1);
+
+    cv::Mat limg, rimg;
+    cv::cvtColor(left_image, limg, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(right_image, rimg, cv::COLOR_BGR2GRAY);
+
+    progress p(rows - wr * 2, "NCC");
+#pragma omp parallel for
+    for (int y = wr; y < rows - wr; ++y) {
+        for (int x = wr + conf.ndisp; x < cols - wr; ++x) {
+            uint32_t lisum  = 0;
+            uint32_t li2sum = 0;
+            for (int i = -wr; i < wr; ++i) {
+                for (int j = -wr; j < wr; ++j) {
+                    int lcol = limg.at<uint8_t>(y + j, x + i);
+                    lisum += lcol;
+                    li2sum += sq(lcol);
+                }
+            }
+
+            int pos      = -1;
+            flt max_loss = std::numeric_limits<flt>::lowest();
+            for (int d = 0; d < conf.ndisp; ++d) {
+                int      rx     = x - d;
+                uint32_t risum  = 0;
+                uint32_t ri2sum = 0;
+                for (int i = -wr; i < wr; ++i) {
+                    for (int j = -wr; j < wr; ++j) {
+                        int rcol = rimg.at<uint8_t>(y + j, rx + i);
+                        risum += rcol;
+                        ri2sum += sq(rcol);
+                    }
+                }
+
+                flt cur_loss = lisum * risum / std::sqrt(li2sum * ri2sum);
+                if (max_loss < cur_loss) {
+                    max_loss = cur_loss;
+                    pos      = rx;
+                }
             }
             // vprintf("disparity = %d\n", std::abs(pos - x));
-            flt d                   = x - pos;
+            flt d                   = std::abs(x - pos);
             disparity.at<flt>(y, x) = d;
-            maxd                    = std::max(maxd, d);
-            mind                    = std::min(mind, d);
         }
         p.advance();
     }
