@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
         stereo_rectification(limg, rimg, lconf, rconf, l_rect, r_rect);
     cv::imwrite("l_rect.jpg", l_rect);
     cv::imwrite("r_rect.jpg", r_rect);
+    vprintf("Rectified images written\n");
     /* [/Stereo rectification] */
     // /* [No rectification] */
     // l_rect = limg;

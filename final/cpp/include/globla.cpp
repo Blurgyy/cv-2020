@@ -212,5 +212,38 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
     cv::imwrite("matched.png", img);
 }
 
+void interpolate(cv::Mat &img) {
+    if (img.type() != CV_8UC3) {
+        eprintf("\n");
+    }
+    int dx[] = {-1, 1};
+    int dy[] = {-1, 1};
+    int rows = img.rows;
+    int cols = img.cols;
+    for (int y = 1; y < rows - 1; ++y) {
+        for (int x = 1; x < cols - 1; ++x) {
+            cv::Vec3b &elem = img.at<cv::Vec3b>(y, x);
+            if (elem == cv::Vec3b{0, 0, 0}) {
+                int cnt = 0;
+                flt b = 0, g = 0, r = 0;
+                for (int xoff : dx) {
+                    for (int yoff : dy) {
+                        cv::Vec3b nei = img.at<cv::Vec3b>(y + yoff, x + xoff);
+                        if (nei == cv::Vec3b(0, 0, 0)) {
+                            continue;
+                        }
+                        ++cnt;
+                        b += nei[0];
+                        g += nei[1];
+                        r += nei[2];
+                    }
+                }
+                b /= cnt, g /= cnt, r /= cnt;
+                elem = cv::Vec3b(b, g, r);
+            }
+        }
+    }
+}
+
 // Author: Blurgy <gy@blurgy.xyz>
 // Date:   Mar 07 2021, 16:15 [CST]

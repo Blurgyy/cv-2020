@@ -154,6 +154,9 @@ std::vector<ppp> stereo_rectification(cv::Mat const &left_image,
                 cv::Vec3b(rp.color[0], rp.color[1], rp.color[2]);
         }
     }
+    interpolate(rectified_left_image);
+    interpolate(rectified_right_image);
+
     return ret;
 }
 

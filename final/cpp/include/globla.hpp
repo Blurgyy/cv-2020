@@ -110,6 +110,8 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
                  std::vector<cv::KeyPoint> &kp2,
                  std::vector<cv::DMatch> &  matches);
 
+void interpolate(cv::Mat &img);
+
 struct progress {
     progress(int const &tot = 1, std::string const &title = "progress")
         : now(0), tot(tot), title{title} {}
