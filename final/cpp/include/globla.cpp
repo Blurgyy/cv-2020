@@ -221,6 +221,13 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
     cv::imwrite("matched.png", img);
 }
 
+cv::Vec3b lerp(cv::Vec3b const &a, cv::Vec3b const &b, flt const &t) {
+    return cv::Vec3b{
+        static_cast<unsigned char>(a[0] * (1 - t) + b[0] * t),
+        static_cast<unsigned char>(a[1] * (1 - t) + b[1] * t),
+        static_cast<unsigned char>(a[2] * (1 - t) + b[2] * t),
+    };
+}
 cv::Mat downsample(cv::Mat const &img, int const &factor) {
     int     rows = (img.rows + factor - 1) / factor;
     int     cols = (img.cols + factor - 1) / factor;
@@ -230,6 +237,34 @@ cv::Mat downsample(cv::Mat const &img, int const &factor) {
         for (int x = 0; x < cols; ++x) {
             ret.at<cv::Vec3b>(y, x) =
                 img.at<cv::Vec3b>(y * factor, x * factor);
+        }
+    }
+
+    return ret;
+}
+cv::Mat upsample(cv::Mat const &img, int const &factor) {
+    int     rows = img.rows * factor;
+    int     cols = img.cols * factor;
+    cv::Mat ret(rows, cols, img.type());
+
+    for (int y = 0; y < rows; ++y) {
+        int yoffset = y % factor;
+        for (int x = 0; x < cols; ++x) {
+            int        xoffset = x % factor;
+            cv::Vec3b &col     = ret.at<cv::Vec3b>(y, x);
+            if (y / factor + 1 == img.rows || x / factor + 1 == img.cols) {
+                col = img.at<cv::Vec3b>(y / factor, x / factor);
+            } else {
+                cv::Vec3b hor_0 =
+                    lerp(img.at<cv::Vec3b>(y / factor, x / factor),
+                         img.at<cv::Vec3b>(y / factor, x / factor + 1),
+                         1.0 * xoffset / factor);
+                cv::Vec3b hor_1 =
+                    lerp(img.at<cv::Vec3b>(y / factor + 1, x / factor),
+                         img.at<cv::Vec3b>(y / factor + 1, x / factor + 1),
+                         1.0 * xoffset / factor);
+                col = lerp(hor_0, hor_1, 1.0 * yoffset / factor);
+            }
         }
     }
 
