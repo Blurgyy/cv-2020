@@ -4,6 +4,7 @@ project("cv-final") # Project name
 set(target_name "stereo") # Target name (target can be an executable or a library)
 set(sources
     main.cpp
+    # test.cpp
     # Sources
 )
 
@@ -43,12 +44,13 @@ target_link_libraries(${target_name} ${OpenCV_LIBS})
 
 include_directories("extern")
 add_subdirectory("extern")
-target_link_libraries(${target_name} external)
 
 # Custom headers, add this after all other dependencies
 include_directories("include")
 add_subdirectory("include")
+
 target_link_libraries(${target_name} wheels)
+target_link_libraries(${target_name} external)
 
 # vim: set ft=cmake:
 
