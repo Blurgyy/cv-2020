@@ -20,6 +20,14 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
     flt         f = (K[0][0] + K[1][1]) / 2;
     /* Use RANSAC threshold as 0.1 for better results.
      * Reference: https://stackoverflow.com/a/48394798/13482274
+     *
+     * From function documentation in opencv2/calib3d.hpp:
+     *> @param threshold Parameter used for RANSAC. It is the maximum distance
+     *> from a point to an epipolar line in pixels, beyond which the point is
+     *> considered an outlier and is not used for computing the final
+     *> fundamental matrix. It can be set to something like 1-3, depending on
+     *> the accuracy of the point localization, image resolution, and the
+     *> image noise.
      */
     cv::Mat E =
         cv::findEssentialMat(pts1, pts2, f, pp, cv::RANSAC, 0.99, 0.1);
