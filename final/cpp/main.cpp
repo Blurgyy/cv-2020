@@ -74,7 +74,8 @@ int main(int argc, char **argv) {
     /* [/NCC] */
 
     /* [Global] */
-    cv::Mat dep_global = global_optimization(dep_NCC, conf);
+    cv::Mat dep_global =
+        upsample(global_optimization(downsample(dep_NCC, 4), conf), 4);
     cv::imwrite("dep_global.pgm", dep_global);
     cv::Mat dep_global_vis = visualize(dep_global);
     cv::imwrite("dep_global.jpg", dep_global_vis);
