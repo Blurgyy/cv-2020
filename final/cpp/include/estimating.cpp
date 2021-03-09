@@ -52,7 +52,7 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
     }
     int     rows = left_image.rows;
     int     cols = left_image.cols;
-    cv::Mat disparity(rows, cols, CV_64FC1);
+    cv::Mat disparity(rows, cols, CV_32SC1);
     disparity = 0;
 
     cv::Mat limg, rimg;
@@ -88,7 +88,7 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
             }
             // vprintf("disparity = %d\n", std::abs(pos - x));
             flt d                   = std::abs(x - pos);
-            disparity.at<flt>(y, x) = d;
+            disparity.at<int>(y, x) = d;
         }
         p.advance();
     }
@@ -104,7 +104,7 @@ cv::Mat NCC(cv::Mat const &left_image, cv::Mat const &right_image,
     }
     int     rows = left_image.rows;
     int     cols = left_image.cols;
-    cv::Mat disparity(rows, cols, CV_64FC1);
+    cv::Mat disparity(rows, cols, CV_32SC1);
     disparity = 0;
 
     cv::Mat limg, rimg;
@@ -153,7 +153,7 @@ cv::Mat NCC(cv::Mat const &left_image, cv::Mat const &right_image,
             }
             // vprintf("disparity = %d\n", std::abs(pos - x));
             flt d                   = std::abs(x - pos);
-            disparity.at<flt>(y, x) = d;
+            disparity.at<int>(y, x) = d;
         }
         p.advance();
     }

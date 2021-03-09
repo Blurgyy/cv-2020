@@ -109,13 +109,17 @@ MiscConf read_calib(std::string const &filename) {
 }
 
 cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
-                 int const &cols, cv::Mat const &dep) {
-    if (pixel_map.size() == 0) {
-        return dep;
+                 int const &cols, cv::Mat const &disp) {
+    if (disp.type() != CV_32SC1) {
+        eprintf("Expected disparity map type is CV_32SC1 (%d), got %d\n",
+                disp.type());
     }
-    int     drows = dep.rows;
-    int     dcols = dep.cols;
-    cv::Mat ret   = cv::Mat(rows, cols, CV_64FC1, -1);
+    if (pixel_map.size() == 0) {
+        return disp;
+    }
+    int     drows = disp.rows;
+    int     dcols = disp.cols;
+    cv::Mat ret   = cv::Mat(rows, cols, CV_32SC1, -1);
 
     for (ppp const &item : pixel_map) {
         SpatialPoint dep_p = item.second;
@@ -126,8 +130,8 @@ cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
             SpatialPoint ori_p        = item.first;
             int          ori_x        = ori_p.pos.x;
             int          ori_y        = ori_p.pos.y;
-            flt          depth        = dep.at<flt>(dep_y, dep_x);
-            ret.at<flt>(ori_y, ori_x) = depth;
+            flt          depth        = disp.at<int>(dep_y, dep_x);
+            ret.at<int>(ori_y, ori_x) = depth;
         }
     }
 
@@ -138,6 +142,10 @@ cv::Mat visualize(cv::Mat const &input, flt const &gamma) {
     if (input.channels() != 1) {
         eprintf("More than 1 channels encountered when attempting to "
                 "normalize image\n");
+    }
+    if (input.type() != CV_32SC1) {
+        eprintf("Expected disparity map type is CV_32SC1 (%d), got %d\n",
+                input.type());
     }
 
     int rows = input.rows;
@@ -150,7 +158,7 @@ cv::Mat visualize(cv::Mat const &input, flt const &gamma) {
 
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
-            flt const &value = input.at<flt>(y, x);
+            flt const &value = input.at<int>(y, x);
             maxd             = std::max<flt>(maxd, value);
             mind             = std::min<flt>(mind, value);
         }
@@ -158,7 +166,7 @@ cv::Mat visualize(cv::Mat const &input, flt const &gamma) {
 
     for (int y = 0; y < rows; ++y) {
         for (int x = 0; x < cols; ++x) {
-            flt const &ivalue     = input.at<flt>(y, x);
+            flt const &ivalue     = input.at<int>(y, x);
             flt        value      = (ivalue - mind) / (maxd - mind);
             value                 = std::pow(value, gamma);
             value                 = value * 256 - 0.5;
