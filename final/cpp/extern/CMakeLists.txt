@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 3.19)
-project("cv-final") # Project name
+project("graph-cuts") # Project name
 
-set(target_name "stereo") # Target name (target can be an executable or a library)
+set(target_name "external") # Target name (target can be an executable or a library)
 set(sources
-    main.cpp
+    GCoptimization.cpp
+    LinkedBlockList.cpp
+    graph.cpp
+    maxflow.cpp
     # Sources
 )
 
-set(CMAKE_CXX_FLAGS "-fopenmp ${CMAKE_CXX_FLAGS}")
+# # Enable OpenMP
+# set(CMAKE_CXX_FLAGS "-fopenmp ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS_DEBUG "-g -Wall")
 set(CMAKE_C_FLAGS_RELEASE "-O2 -w -DNDEBUG")
 set(CMAKE_CXX_STANDARD 20)
@@ -19,17 +23,17 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -w -DNDEBUG")
 # set(CMAKE_BUILD_TYPE "Debug")
 # set(CMAKE_BUILD_TYPE "Release")
 
-# Build an executable:
-add_executable(${target_name} "${sources}")
-# # Or, build a library to be linked:
-# add_library(${target_name} STATIC ${sources})
+# # Build an executable:
+# add_executable(${target_name} "${sources}")
+# Or, build a library to be linked:
+add_library(${target_name} STATIC ${sources})
 # add_library(${target_name} SHARED ${sources})
 # add_library(${target_name} MODULE ${sources})  # I have no idea what this is
 
-# OpenCV
-find_package(OpenCV)
-include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${target_name} ${OpenCV_LIBS})
+# # OpenCV
+# find_package(OpenCV)
+# include_directories(${OpenCV_INCLUDE_DIRS})
+# target_link_libraries(${target_name} ${OpenCV_LIBS})
 
 # # Magick++ (ImageMagick)
 # find_package(ImageMagick COMPONENTS Magick++)
@@ -41,16 +45,12 @@ target_link_libraries(${target_name} ${OpenCV_LIBS})
 # add_definitions(-DMAGICKCORE_QUANTUM_DEPTH=16)
 # add_definitions(-DMAGICKCORE_HDRI_ENABLE=1)
 
-include_directories("extern")
-add_subdirectory("extern")
-target_link_libraries(${target_name} external)
-
-# Custom headers, add this after all other dependencies
-include_directories("include")
-add_subdirectory("include")
-target_link_libraries(${target_name} wheels)
+# # Custom headers, add this after all other dependencies
+# include_directories("include")
+# add_subdirectory("include")
+# target_link_libraries(${target_name} wheels)
 
 # vim: set ft=cmake:
 
 # Author: Blurgy <gy@blurgy.xyz>
-# Date:   Feb 25 2021, 15:32 [CST]
+# Date:   Mar 09 2021, 15:19 [CST]
