@@ -31,5 +31,8 @@ ROADMAP.md
 # ClangD cache
 .cache/
 
+# Temporary executables
+a.out
+
 # Author: Blurgy <gy@blurgy.xyz>
 # Date:   Nov 30 2020, 22:01 [CST]
