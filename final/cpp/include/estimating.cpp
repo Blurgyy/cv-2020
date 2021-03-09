@@ -71,8 +71,13 @@ cv::Mat SAD(cv::Mat const &left_image, cv::Mat const &right_image,
             int      pos      = -1;
             /* Iterate through the same row */
             // for (int rx = wr; rx < cols - wr; ++rx) {
-            for (int d = 0; d < conf.ndisp; ++d) {
-                int      rx       = x - d;
+            int ndisp = conf.ndisp == 0 ? cols : conf.ndisp;
+            for (int d = 0; d < ndisp; ++d) {
+                int rx = x - d;
+                if (rx < 0) {
+                    break;
+                }
+
                 uint32_t cur_diff = 0;
                 for (int i = -wr; i < wr; ++i) {
                     for (int j = -wr; j < wr; ++j) {
@@ -118,8 +123,12 @@ cv::Mat NCC(cv::Mat const &left_image, cv::Mat const &right_image,
             int pos      = -1;
             flt max_corr = std::numeric_limits<flt>::lowest();
 
-            for (int d = 0; d < conf.ndisp; ++d) {
+            int ndisp = conf.ndisp == 0 ? cols : conf.ndisp;
+            for (int d = 0; d < ndisp; ++d) {
                 int rx = x - d;
+                if (rx < 0) {
+                    break;
+                }
 
                 flt lavg = 0;
                 flt ravg = 0;

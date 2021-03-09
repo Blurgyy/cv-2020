@@ -59,7 +59,8 @@ std::tuple<CamConf, CamConf> read_cam(std::string const &filename) {
 }
 
 MiscConf read_calib(std::string const &filename) {
-    MiscConf      ret;
+    MiscConf ret;
+    ret.ndisp = 0;
     std::ifstream from{filename};
     if (from.fail()) {
         eprintf("Failed opening file %s\n", filename.c_str());
