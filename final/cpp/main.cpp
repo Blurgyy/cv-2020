@@ -73,6 +73,13 @@ int main(int argc, char **argv) {
     cv::imwrite("dep_NCC.jpg", dep_NCC_vis);
     /* [/NCC] */
 
+    /* [Global] */
+    cv::Mat dep_global = global_optimization(dep_NCC, conf);
+    cv::imwrite("dep_global.pgm", dep_global);
+    cv::Mat dep_global_vis = visualize(dep_global);
+    cv::imwrite("dep_global.jpg", dep_global_vis);
+    /* [/Global] */
+
     return 0;
 }
 

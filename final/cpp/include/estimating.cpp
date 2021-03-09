@@ -1,3 +1,4 @@
+#include "GCoptimization.h"
 #include "estimating.hpp"
 
 #include <cmath>
@@ -41,6 +42,65 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
         for (int j = 0; j < 3; ++j) {
             R[i][j] = RMat.at<flt>(i, j);
         }
+    }
+}
+
+cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf) {
+    if (data.type() != CV_32SC1) {
+        eprintf("Expected disparity map type is CV_32SC1 (%d), got %d\n",
+                data.type());
+    }
+    int       rows              = data.rows;
+    int       cols              = data.cols;
+    int       n_labels          = conf.ndisp == 0 ? cols : conf.ndisp;
+    int const default_data_cost = 10;
+
+    try {
+        vprintf("Initializing graph ..\n");
+        GCoptimizationGridGraph *graph =
+            new GCoptimizationGridGraph(cols, rows, n_labels);
+        graph->setVerbosity(1);
+
+        /* Set data cost */
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
+                int idx = y * cols + x;
+                for (int l = 0; l < n_labels; ++l) {
+                    if (l == data.at<int>(y, x)) {
+                        graph->setDataCost(idx, l, 0);
+                    } else {
+                        graph->setDataCost(idx, l, default_data_cost);
+                    }
+                }
+            }
+        }
+        /* Set smoothness cost */
+        for (int l0 = 0; l0 < n_labels; ++l0) {
+            for (int l1 = 0; l1 < n_labels; ++l1) {
+                // graph->setSmoothCost(l0, l1, std::min(sq(l0 - l1), 4));
+                /* Pott's model */
+                int cost = 15 * (l0 != l1);
+                graph->setSmoothCost(l0, l1, cost);
+            }
+        }
+
+        vprintf("Initial energy in graph is %d, starting optimization via "
+                "graph cuts ..\n",
+                graph->compute_energy());
+        graph->expansion();
+        vprintf("Done, energy after convergence is %d\n",
+                graph->compute_energy());
+
+        cv::Mat ret(rows, cols, CV_32SC1);
+        for (int y = 0; y < rows; ++y) {
+            for (int x = 0; x < cols; ++x) {
+                ret.at<int>(y, x) = graph->whatLabel(y * cols + x);
+            }
+        }
+        return ret;
+    } catch (GCException e) {
+        e.Report();
+        eprintf("Error encountered\n");
     }
 }
 

@@ -7,6 +7,12 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
                      std::vector<cv::DMatch> const &matches, mat3 const &K,
                      mat3 &R, vec3 &t);
 
+/* Disparity estimation via graph-cuts method.
+ * @param `{l,r}img` **Rectified** stereo images.
+ * @param `conf` Configs.
+ */
+cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf);
+
 /* Sum of absolute difference (SAD).
  * @param `{l,r}img` **Rectified** stereo images.
  * @param `wr` Window radius, window size is: `wr` * 2 + 1
