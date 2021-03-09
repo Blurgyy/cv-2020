@@ -105,6 +105,8 @@ cv::Mat map_back(std::vector<ppp> const &pixel_map, int const &rows,
                  int const &cols, cv::Mat const &disp);
 cv::Mat visualize(cv::Mat const &input, flt const &gamma = 0.3);
 
+cv::Mat downsample(cv::Mat const &img, int const &factor = 2);
+
 void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
                  std::vector<cv::KeyPoint> &kp1,
                  std::vector<cv::KeyPoint> &kp2,

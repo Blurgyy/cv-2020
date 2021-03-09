@@ -221,6 +221,21 @@ void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
     cv::imwrite("matched.png", img);
 }
 
+cv::Mat downsample(cv::Mat const &img, int const &factor) {
+    int     rows = (img.rows + factor - 1) / factor;
+    int     cols = (img.cols + factor - 1) / factor;
+    cv::Mat ret(rows, cols, img.type());
+
+    for (int y = 0; y < rows; ++y) {
+        for (int x = 0; x < cols; ++x) {
+            ret.at<cv::Vec3b>(y, x) =
+                img.at<cv::Vec3b>(y * factor, x * factor);
+        }
+    }
+
+    return ret;
+}
+
 void interpolate(cv::Mat &img) {
     if (img.type() != CV_8UC3) {
         eprintf("\n");
