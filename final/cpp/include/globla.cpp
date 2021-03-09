@@ -68,7 +68,7 @@ MiscConf read_calib(std::string const &filename) {
     for (std::string line; std::getline(from, line);) {
         for (int i = 0; i < line.length(); ++i) {
             if (line[i] == '=' || line[i] == '[' || line[i] == ']' ||
-                line[i] == ';') {
+                line[i] == ';' || line[i] == ',') {
                 line[i] = ' ';
             }
         }
