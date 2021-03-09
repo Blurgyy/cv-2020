@@ -58,27 +58,27 @@ int main(int argc, char **argv) {
     int wr = 5;
 
     /* [SAD] */
-    cv::Mat dep_SAD = SAD(l_rect, r_rect, wr, conf);
-    dep_SAD         = map_back(pixel_map, rows, cols, dep_SAD);
-    cv::imwrite("dep_SAD.pgm", dep_SAD);
-    cv::Mat dep_SAD_vis = visualize(dep_SAD);
-    cv::imwrite("dep_SAD.jpg", dep_SAD_vis);
+    cv::Mat disp_SAD = SAD(l_rect, r_rect, wr, conf);
+    disp_SAD         = map_back(pixel_map, rows, cols, disp_SAD);
+    cv::imwrite("disp_SAD.pgm", disp_SAD);
+    cv::Mat disp_SAD_vis = visualize(disp_SAD);
+    cv::imwrite("disp_SAD.jpg", disp_SAD_vis);
     /* [/SAD] */
 
     /* [NCC] */
-    cv::Mat dep_NCC = NCC(l_rect, r_rect, wr, conf);
-    dep_NCC         = map_back(pixel_map, rows, cols, dep_NCC);
-    cv::imwrite("dep_NCC.pgm", dep_NCC);
-    cv::Mat dep_NCC_vis = visualize(dep_NCC);
-    cv::imwrite("dep_NCC.jpg", dep_NCC_vis);
+    cv::Mat disp_NCC = NCC(l_rect, r_rect, wr, conf);
+    disp_NCC         = map_back(pixel_map, rows, cols, disp_NCC);
+    cv::imwrite("disp_NCC.pgm", disp_NCC);
+    cv::Mat disp_NCC_vis = visualize(disp_NCC);
+    cv::imwrite("disp_NCC.jpg", disp_NCC_vis);
     /* [/NCC] */
 
     /* [Global] */
-    cv::Mat dep_global =
-        upsample(global_optimization(downsample(dep_NCC, 4), conf), 4);
-    cv::imwrite("dep_global.pgm", dep_global);
-    cv::Mat dep_global_vis = visualize(dep_global);
-    cv::imwrite("dep_global.jpg", dep_global_vis);
+    cv::Mat disp_global =
+        upsample(global_optimization(downsample(disp_NCC, 4), conf), 4);
+    cv::imwrite("disp_global.pgm", disp_global);
+    cv::Mat disp_global_vis = visualize(disp_global);
+    cv::imwrite("disp_global.jpg", disp_global_vis);
     /* [/Global] */
 
     return 0;
