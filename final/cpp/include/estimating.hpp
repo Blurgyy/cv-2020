@@ -10,8 +10,11 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
 /* Disparity estimation via graph-cuts method.
  * @param `{l,r}img` **Rectified** stereo images.
  * @param `conf` Configs.
+ * @param `max_iter` Maximum iterations to perform graph cut optimization, use
+ * `-1` to iterate until convergence, default value is `6`.
  */
-cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf);
+cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf,
+                            int const &max_iter = 6);
 
 /* Sum of absolute difference (SAD).
  * @param `{l,r}img` **Rectified** stereo images.

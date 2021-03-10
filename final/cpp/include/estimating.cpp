@@ -45,7 +45,8 @@ void pose_estimation(std::vector<cv::KeyPoint> const &kp1,
     }
 }
 
-cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf) {
+cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf,
+                            int const &max_iter) {
     if (data.type() != CV_32SC1) {
         eprintf("Expected disparity map type is CV_32SC1 (%d), got %d\n",
                 data.type());
@@ -87,7 +88,7 @@ cv::Mat global_optimization(cv::Mat const &data, MiscConf const &conf) {
         vprintf("Initial energy in graph is %d, starting optimization via "
                 "graph cuts ..\n",
                 graph->compute_energy());
-        graph->expansion();
+        graph->expansion(max_iter);
         vprintf("Done, energy after convergence is %d\n",
                 graph->compute_energy());
 
