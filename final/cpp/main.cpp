@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
 
     /* [Variables] */
     cv::Mat limg, rimg;
+    int     factor = 4;
     /* [/Variables] */
 
     /* [Parse args] */
@@ -30,6 +31,8 @@ int main(int argc, char **argv) {
     }
     limg     = cv::imread(argv[1], cv::IMREAD_COLOR);
     rimg     = cv::imread(argv[2], cv::IMREAD_COLOR);
+    limg     = downsample<cv::Vec3b>(limg, factor);
+    rimg     = downsample<cv::Vec3b>(rimg, factor);
     int rows = limg.rows;
     int cols = rimg.cols;
     if (rows != rimg.rows || cols != rimg.cols) {
@@ -58,24 +61,26 @@ int main(int argc, char **argv) {
     int wr = 5;
 
     /* [SAD] */
-    cv::Mat disp_SAD = SAD(l_rect, r_rect, wr, conf);
-    disp_SAD         = map_back(pixel_map, rows, cols, disp_SAD);
-    cv::imwrite("disp_SAD.pgm", disp_SAD);
-    cv::Mat disp_SAD_vis = visualize(disp_SAD);
+    cv::Mat disp_SAD    = SAD(l_rect, r_rect, wr, conf);
+    disp_SAD            = map_back(pixel_map, rows, cols, disp_SAD);
+    cv::Mat disp_SAD_up = upsample<int>(disp_SAD, factor);
+    cv::imwrite("disp_SAD.pgm", disp_SAD_up);
+    cv::Mat disp_SAD_vis = visualize(disp_SAD_up);
     cv::imwrite("disp_SAD.jpg", disp_SAD_vis);
     /* [/SAD] */
 
     /* [NCC] */
-    cv::Mat disp_NCC = NCC(l_rect, r_rect, wr, conf);
-    disp_NCC         = map_back(pixel_map, rows, cols, disp_NCC);
-    cv::imwrite("disp_NCC.pgm", disp_NCC);
-    cv::Mat disp_NCC_vis = visualize(disp_NCC);
+    cv::Mat disp_NCC    = NCC(l_rect, r_rect, wr, conf);
+    disp_NCC            = map_back(pixel_map, rows, cols, disp_NCC);
+    cv::Mat disp_NCC_up = upsample<int>(disp_NCC, factor);
+    cv::imwrite("disp_NCC.pgm", disp_NCC_up);
+    cv::Mat disp_NCC_vis = visualize(disp_NCC_up);
     cv::imwrite("disp_NCC.jpg", disp_NCC_vis);
     /* [/NCC] */
 
     /* [Global] */
-    cv::Mat disp_global =
-        upsample(global_optimization(downsample(disp_NCC, 4), conf), 4);
+    cv::Mat disp_global = global_optimization(disp_NCC, conf);
+    disp_global         = upsample<int>(disp_global, factor);
     cv::imwrite("disp_global.pgm", disp_global);
     cv::Mat disp_global_vis = visualize(disp_global);
     cv::imwrite("disp_global.jpg", disp_global_vis);

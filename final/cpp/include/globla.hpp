@@ -107,8 +107,47 @@ cv::Mat visualize(cv::Mat const &input, flt const &gamma = 0.3);
 
 cv::Vec3b lerp(cv::Vec3b const &a, cv::Vec3b const &b, flt const &t);
 int       lerp(int const &a, int const &b, flt const &t);
-cv::Mat   downsample(cv::Mat const &img, int const &factor = 2);
-cv::Mat   upsample(cv::Mat const &img, int const &factor = 2);
+template <typename T>
+cv::Mat downsample(cv::Mat const &img, int const &factor = 2) {
+    int     rows = (img.rows + factor - 1) / factor;
+    int     cols = (img.cols + factor - 1) / factor;
+    cv::Mat ret(rows, cols, img.type());
+
+    for (int y = 0; y < rows; ++y) {
+        for (int x = 0; x < cols; ++x) {
+            ret.at<T>(y, x) = img.at<T>(y * factor, x * factor);
+        }
+    }
+
+    return ret;
+}
+template <typename T>
+cv::Mat upsample(cv::Mat const &img, int const &factor = 2) {
+    int     rows = img.rows * factor;
+    int     cols = img.cols * factor;
+    cv::Mat ret(rows, cols, img.type());
+
+    for (int y = 0; y < rows; ++y) {
+        int yoffset = y % factor;
+        for (int x = 0; x < cols; ++x) {
+            int xoffset = x % factor;
+            T & col     = ret.at<T>(y, x);
+            if (y / factor + 1 == img.rows || x / factor + 1 == img.cols) {
+                col = img.at<T>(y / factor, x / factor);
+            } else {
+                T hor_0 = lerp(img.at<T>(y / factor, x / factor),
+                               img.at<T>(y / factor, x / factor + 1),
+                               1.0 * xoffset / factor);
+                T hor_1 = lerp(img.at<T>(y / factor + 1, x / factor),
+                               img.at<T>(y / factor + 1, x / factor + 1),
+                               1.0 * xoffset / factor);
+                col     = lerp(hor_0, hor_1, 1.0 * yoffset / factor);
+            }
+        }
+    }
+
+    return ret;
+}
 
 void get_matches(cv::Mat const &limg, cv::Mat const &rimg,
                  std::vector<cv::KeyPoint> &kp1,
