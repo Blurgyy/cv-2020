@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
     /* [Variables] */
     cv::Mat limg, rimg;
-    int     factor = 4;
+    int     factor = 2;
     /* [/Variables] */
 
     /* [Parse args] */
