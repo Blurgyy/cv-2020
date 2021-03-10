@@ -10,7 +10,10 @@
 
 #include <opencv2/opencv.hpp>
 
-void Usage() { fprintf(stderr, "Usage:\n"); }
+void Usage(char **argv) {
+    fprintf(stderr, "Usage: %s <left-image> <right-image> <calib.txt>\n",
+            argv[0]);
+}
 
 int main(int argc, char **argv) {
     /* [Testing area] */
@@ -26,7 +29,7 @@ int main(int argc, char **argv) {
 
     /* [Parse args] */
     if (argc < 4) {
-        Usage();
+        Usage(argv);
         return 1;
     }
     limg     = cv::imread(argv[1], cv::IMREAD_COLOR);
