@@ -108,7 +108,10 @@ cv::Mat visualize(cv::Mat const &input, flt const &gamma = 0.3);
 cv::Vec3b lerp(cv::Vec3b const &a, cv::Vec3b const &b, flt const &t);
 int       lerp(int const &a, int const &b, flt const &t);
 template <typename T>
-cv::Mat downsample(cv::Mat const &img, int const &factor = 2) {
+cv::Mat downsample(cv::Mat const &img, uint32_t const &factor = 2) {
+    if (factor == 1) {
+        return img;
+    }
     int     rows = (img.rows + factor - 1) / factor;
     int     cols = (img.cols + factor - 1) / factor;
     cv::Mat ret(rows, cols, img.type());
@@ -122,7 +125,10 @@ cv::Mat downsample(cv::Mat const &img, int const &factor = 2) {
     return ret;
 }
 template <typename T>
-cv::Mat upsample(cv::Mat const &img, int const &factor = 2) {
+cv::Mat upsample(cv::Mat const &img, uint32_t const &factor = 2) {
+    if (factor == 1) {
+        return img;
+    }
     int     rows = img.rows * factor;
     int     cols = img.cols * factor;
     cv::Mat ret(rows, cols, img.type());
