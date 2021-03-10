@@ -31,8 +31,6 @@ int main(int argc, char **argv) {
     }
     limg     = cv::imread(argv[1], cv::IMREAD_COLOR);
     rimg     = cv::imread(argv[2], cv::IMREAD_COLOR);
-    limg     = downsample<cv::Vec3b>(limg, factor);
-    rimg     = downsample<cv::Vec3b>(rimg, factor);
     int rows = limg.rows;
     int cols = rimg.cols;
     if (rows != rimg.rows || cols != rimg.cols) {
@@ -59,6 +57,13 @@ int main(int argc, char **argv) {
     // /* [/No rectification] */
 
     int wr = 5;
+
+    /* Downsample rectified images */
+    l_rect = downsample<cv::Vec3b>(l_rect, factor);
+    r_rect = downsample<cv::Vec3b>(r_rect, factor);
+    for (int i = 0; i < pixel_map.size(); ++i) {
+        pixel_map[i].second.pos /= static_cast<flt>(factor);
+    }
 
     /* [SAD] */
     cv::Mat disp_SAD    = SAD(l_rect, r_rect, wr, conf);
